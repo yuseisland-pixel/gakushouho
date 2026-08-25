@@ -211,18 +211,21 @@
     return { ok: inp.value === val, actual: inp.value };
   }
 
-  function fillRadio(q, val) {
+  async function fillRadio(q, val) {
     var target = normalizeHeading(val);
     var opts = Array.prototype.slice.call(q.querySelectorAll('[role="radio"],input[type="radio"]'));
-    var hit = null;
+    var hits = [];
     for (var i = 0; i < opts.length; i++) {
       var label = opts[i].getAttribute('aria-label') || text(opts[i].closest('label')) || text(opts[i].parentElement);
-      if (normalizeHeading(label) === target) { hit = opts[i]; break; }
+      if (normalizeHeading(label) === target) { hits.push(opts[i]); }
     }
-    if (!hit) return { ok: false, reason: '選択肢「' + val + '」が見つかりません' };
+    if (!hits.length) return { ok: false, reason: '選択肢「' + val + '」が見つかりません' };
+    if (hits.length > 1) return { ok: false, reason: '選択肢「' + val + '」が複数見つかります（曖昧です）' };
+    var hit = hits[0];
     hit.click();
     var wrap = hit.closest('label,[role="radio"]');
     if (wrap && wrap !== hit) wrap.click();
+    await sleep(20);
     var checked = q.querySelector('[role="radio"][aria-checked="true"],input[type="radio"]:checked');
     var actual = checked ? (checked.getAttribute('aria-label') || text(checked.closest('label') || checked.parentElement)) : '';
     return { ok: normalizeHeading(actual) === target, actual: actual };
@@ -286,16 +289,21 @@
     }
 
     var target = normalizeHeading(val);
-    var hit = null;
+    var hits = [];
     for (var i = 0; i < options.length; i++) {
       var label = options[i].getAttribute('aria-label') || text(options[i]);
-      if (normalizeHeading(label) === target) { hit = options[i]; break; }
+      if (normalizeHeading(label) === target) { hits.push(options[i]); }
     }
-    if (!hit) {
+    if (!hits.length) {
       // 開きっぱなしにすると、フォーカスが外れた時点で別の項目が確定してしまう
       await closeDropdown(trigger);
       return { ok: false, reason: '選択肢「' + val + '」が一覧にありません（' + options.length + '件中）' };
     }
+    if (hits.length > 1) {
+      await closeDropdown(trigger);
+      return { ok: false, reason: '選択肢「' + val + '」が複数見つかります（曖昧です）' };
+    }
+    var hit = hits[0];
 
     if (hit.scrollIntoView) hit.scrollIntoView({ block: 'nearest' });
     ['mousedown', 'mouseup', 'click'].forEach(function (t) {
@@ -340,9 +348,7 @@
     var gotNums = (got.match(/\d+/g) || []).map(function (n) { return String(Number(n)); }).sort().join(',');
     if (got && wantNums === gotNums) return { ok: true, actual: got };
 
-    // 受理されなかった。中途半端な文字列を残さない
-    setNativeValue(inp, '');
-    inp.dispatchEvent(new Event('blur', { bubbles: true }));
+    // 受理されなかった。入力済みの値は残して、ユーザーが気付いて修正できるようにする
     return { ok: false, actual: got, reason: '日付が受理されませんでした。手で入力してください' };
   }
 
@@ -467,7 +473,7 @@
 
       var countBefore = live.length;
       var out;
-      if (entry.type === 'radio') out = fillRadio(r.node, val);
+      if (entry.type === 'radio') out = await fillRadio(r.node, val);
       else if (entry.type === 'dropdown') out = await fillDropdown(r.node, val);
       else if (entry.type === 'date') out = await fillDate(r.node, val);
       else out = fillText(r.node, entry.numeric ? String(val).replace(/[^\d]/g, '') : val);
@@ -485,8 +491,9 @@
        * 設問の型によって表記が変わるので、val と比べると全部が差し戻し扱いになる。 */
       var intended = out.actual != null ? out.actual : String(val);
       var actual = reread !== '' ? reread : intended;
-      if (out.ok && normalizeHeading(actual) !== normalizeHeading(intended)) {
-        out = { ok: false, actual: actual, reason: out.reason };
+      if (out.actual != null) {
+        var matches = normalizeHeading(actual) === normalizeHeading(intended);
+        out = { ok: matches, actual: actual, reason: out.reason };
       }
       resolvedValues[entry.qid] = actual;
 
