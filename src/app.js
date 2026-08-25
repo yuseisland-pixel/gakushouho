@@ -378,7 +378,9 @@
 
   function collectIssues() {
     var out = [];
-    if (!root.Store.isPersonalReady(state)) out.push('「1. あなたの情報」の氏名と、「2. 申請者の情報」の氏名・メールアドレスを入れてください。');
+    if (!state.personal.氏名) out.push('「1. あなたの情報」の氏名を入れてください。');
+    if (!state.applicant.氏名) out.push('「2. 申請者の情報」の氏名を入れてください。');
+    if (!state.applicant.メール) out.push('「2. 申請者の情報」のメールアドレスを入れてください。');
     if (!state.org.加入区分) out.push('「3. 団体情報」の「加入を希望する補償制度」を選んでください。');
     if (!state.org.活動区分) out.push('「3. 団体情報」の「活動の種類」を選んでください。');
     if (!state.org.申請先) out.push('「3. 団体情報」の「申請先」を選んでください。');
@@ -624,9 +626,6 @@
   }
 
   function refresh() {
-    var ready = root.Store.isPersonalReady(state);
-    $('gate').classList.toggle('hidden', ready);
-    $('btn-roster').disabled = !ready;
     /* フォームと同じ条件でだけ欄を出す。条件を満たさない設問はフォームにも現れないので、
      * ここで値を持たせても使い道がなく、選ばせると誤った申請のもとになる。 */
     // 申請先が「その他」のときだけ、箇所名の入力欄を出す
@@ -654,6 +653,7 @@
     renderApplicantHistory();
     $('ap-share-use-own').checked = !!state.applicant.共有メール自分を使う;
     $('ap-share-mail').disabled = !!state.applicant.共有メール自分を使う;
+    $('shorten-url').checked = !!state.shortenUrl;
     refresh();
   }
 
@@ -885,6 +885,9 @@
       if (!confirm('この端末に保存した設定・メンバー辞書をすべて削除します。元に戻せません。よろしいですか？')) return;
       root.Store.clear();
       state = root.Store.blank();
+      $('m-sid').value = ''; $('m-kana').value = ''; $('m-name').value = '';
+      $('m-filter').value = '';
+      $('probe-paste').value = '';
       resyncFromState();
       setMsg($('io-msg'), '削除しました。', true);
     });

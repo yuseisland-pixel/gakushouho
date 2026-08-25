@@ -96,12 +96,6 @@
     try { localStorage.removeItem(KEY); } catch (e) { /* 消せなくても続行 */ }
   }
 
-  /** 個人設定が埋まっているか。埋まるまでは他の機能を使わせない。 */
-  function isPersonalReady(data) {
-    var p = data.personal, a = data.applicant;
-    return !!(p.氏名 && a.氏名 && a.メール);
-  }
-
   function newId() {
     return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   }
@@ -192,7 +186,7 @@
 
   root.Store = {
     load: load, save: save, clear: clear, blank: blank,
-    isPersonalReady: isPersonalReady, newId: newId,
+    newId: newId,
     exportData: exportData, importData: importData, EXPORT_FIELDS: EXPORT_FIELDS, EXPORT_TEMPLATES: EXPORT_TEMPLATES
   };
 })(window.GSH = window.GSH || {});
