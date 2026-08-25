@@ -577,6 +577,22 @@
     refreshPrefill();
   }
 
+  // state をまとめて差し替えたあと（インポート／削除／設問マッピング取り込み）の再描画。
+  // 初期化時と同じ関数群を同じ順序で呼び直す。bindFields() ではなく syncFieldValues() を使うのは、
+  // bindFields() は呼ぶたびに input リスナーを重複登録してしまうため。
+  function resyncFromState() {
+    populateSelects();
+    migrateChoiceValues();
+    syncFieldValues(FIELDS.map(function (f) { return f[0]; }));
+    syncSelfMember();
+    renderPresets();
+    renderOrgPresets();
+    renderApplicantHistory();
+    $('ap-share-use-own').checked = !!state.applicant.共有メール自分を使う;
+    $('ap-share-mail').disabled = !!state.applicant.共有メール自分を使う;
+    refresh();
+  }
+
   // ---- 設問マッピングの取り込み --------------------------------------
   function applyProbe(json) {
     var probe = JSON.parse(json);
@@ -793,7 +809,7 @@
         try {
           var r = root.Store.importData(state, t);
           state = r.data; persist();
-          bindFields(); syncSelfMember(); renderPresets(); renderOrgPresets(); refresh();
+          resyncFromState();
           setMsg($('io-msg'), r.report.join(' / '), true);
         } catch (e) {
           setMsg($('io-msg'), '読み込めませんでした：' + (e && e.message || e), false);
@@ -805,7 +821,7 @@
       if (!confirm('この端末に保存した設定・メンバー辞書をすべて削除します。元に戻せません。よろしいですか？')) return;
       root.Store.clear();
       state = root.Store.blank();
-      bindFields(); syncSelfMember(); renderPresets(); renderOrgPresets(); refresh();
+      resyncFromState();
       setMsg($('io-msg'), '削除しました。', true);
     });
 
@@ -818,7 +834,7 @@
           '取り込みました。設問見出しを ' + m.questions.filter(function (q) { return q.match; }).length + ' 件、' +
           '設問IDを ' + withQid + ' 件登録しました。' +
           (m.未対応の設問.length ? '未対応の設問が ' + m.未対応の設問.length + ' 件あります。' : ''), true);
-        refresh();
+        resyncFromState();
       } catch (e) {
         setMsg($('probe-msg'), '取り込めませんでした：' + (e && e.message || e), false);
       }
