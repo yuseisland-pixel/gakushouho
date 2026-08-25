@@ -41,7 +41,7 @@
       var code = c.charCodeAt(0);
       if (c === ' ') return '␠';                    // 半角スペース
       if (c === '　') return '［全角空白］';
-      if (c === ' ') return '［NBSP］';
+      if (c === ' ') return '［NBSP］';
       if (c === '\t') return '␉';
       if (c === '\n') return '␊';
       return code < 0x80 ? '\\x' + code.toString(16) : c;
