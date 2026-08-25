@@ -41,16 +41,6 @@ if (bundle) {
   check('同梱スクリプトの構文', err === null, err || `${bundle[1].length} 文字`);
 }
 
-// テンプレ xlsx が base64 で埋まっているか
-const b64 = /var TEMPLATE_B64 = "([A-Za-z0-9+/=]+)"/.exec(bundle ? bundle[1] : '');
-check('テンプレ xlsx が埋め込まれている', !!b64);
-if (b64) {
-  const bytes = Buffer.from(b64[1], 'base64');
-  check('埋め込みテンプレが zip として妥当', bytes.readUInt32LE(0) === 0x04034b50, `${bytes.length} バイト`);
-  const orig = fs.readFileSync(path.join(ROOT, 'src', 'template', '参加者名簿.xlsx'));
-  check('埋め込みテンプレが原本と一致', bytes.equals(orig));
-}
-
 // 調査用ブックマークレット
 const probeFile = fs.readdirSync(DIST).find((n) => /^フォーム調査ブックマークレット_.*\.txt$/.test(n));
 check('調査ブックマークレットのファイル名に版が入っている', !!probeFile, probeFile || '見つかりません');

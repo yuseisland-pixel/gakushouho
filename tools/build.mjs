@@ -38,33 +38,6 @@ const VERSION = '1.5.0';
 
 const read = (...p) => fs.readFileSync(path.join(SRC, ...p), 'utf8');
 
-/** テンプレ xlsx の G1「書式更新日：…」を取り出す。大学がテンプレを改訂したとき気付くため。 */
-function templateStamp(xlsxBytes) {
-  // sharedStrings.xml をその場で展開して探す(zip の中央ディレクトリを軽く舐める)
-  const buf = Buffer.from(xlsxBytes);
-  let eocd = -1;
-  for (let i = buf.length - 22; i >= 0; i--) if (buf.readUInt32LE(i) === 0x06054b50) { eocd = i; break; }
-  const n = buf.readUInt16LE(eocd + 10);
-  let p = buf.readUInt32LE(eocd + 16);
-  for (let i = 0; i < n; i++) {
-    const nameLen = buf.readUInt16LE(p + 28);
-    const extraLen = buf.readUInt16LE(p + 30);
-    const cmtLen = buf.readUInt16LE(p + 32);
-    const name = buf.toString('utf8', p + 46, p + 46 + nameLen);
-    if (name === 'xl/sharedStrings.xml') {
-      const lho = buf.readUInt32LE(p + 42);
-      const lnl = buf.readUInt16LE(lho + 26);
-      const lel = buf.readUInt16LE(lho + 28);
-      const start = lho + 30 + lnl + lel;
-      const raw = buf.subarray(start, start + buf.readUInt32LE(p + 20));
-      const xml = (buf.readUInt16LE(p + 10) === 0 ? raw : zlib.inflateRawSync(raw)).toString('utf8');
-      const m = /書式更新日：([0-9/]+)/.exec(xml);
-      return m ? m[1] : '不明';
-    }
-    p += 46 + nameLen + extraLen + cmtLen;
-  }
-  return '不明';
-}
 
 /** コメントと空行を落とす。文字列リテラルを壊さないよう、行頭コメントとブロックコメントだけ。 */
 function shrink(src) {
@@ -83,8 +56,6 @@ function sub(src, token, value) {
 }
 
 function main() {
-  const xlsx = fs.readFileSync(path.join(SRC, 'template', '参加者名簿.xlsx'));
-  const stamp = templateStamp(xlsx);
   const formMap = JSON.parse(read('form', 'form-map.json'));
 
   const fillerSrc = read('form', 'filler.js');
@@ -99,9 +70,7 @@ function main() {
   // 同じ日に何度もビルドするので、日付だけでなく時刻まで入れる
   const builtAt = new Date().toLocaleString('sv-SE').slice(0, 16);   // 例 2026-08-24 22:38
   app = sub(app, '__BUILT_AT__', builtAt);
-  app = sub(app, '__TEMPLATE_STAMP__', stamp);
   app = sub(app, '__FORM_MAP__', JSON.stringify(formMap));
-  app = sub(app, "'__TEMPLATE_B64__'", JSON.stringify(xlsx.toString('base64')));
   app = sub(app, "'__PROBE_SOURCE__'", JSON.stringify('(function(){' + shrink(probeSrc) + '})();'));
 
   const scripts = [
@@ -120,8 +89,8 @@ function main() {
   html = sub(html, '<!-- __SCRIPTS__ -->', '<script>\n' + scripts + '\n</script>');
 
   // 置換漏れの検出。__GSH_PAYLOAD__ は実行時に使う本物の識別子なので対象外。
-  const TOKENS = ['__VERSION__', '__BUILT_AT__', '__TEMPLATE_STAMP__', '__FORM_MAP__',
-    "'__TEMPLATE_B64__'", "'__PROBE_SOURCE__'", "'__FILLER_SOURCE__'",
+  const TOKENS = ['__VERSION__', '__BUILT_AT__', '__FORM_MAP__',
+    "'__PROBE_SOURCE__'", "'__FILLER_SOURCE__'",
     '<!-- __STYLE__ -->', '<!-- __SCRIPTS__ -->'];
   const leftovers = TOKENS.filter((t) => html.includes(t));
   if (leftovers.length) throw new Error('未置換のプレースホルダが残っています: ' + leftovers.join(', '));
@@ -269,7 +238,6 @@ function main() {
   console.log('  ' + outPath + '  (' + kb(Buffer.byteLength(html)) + ')');
   console.log('  ' + path.join(DIST, probeName) + '  (ブックマークレット ' + kb(probeUrl.length) + ')');
   console.log('  ' + path.join(DIST, '読み取りブックマークレット.txt') + '  (' + kb(readbackUrl.length) + ')');
-  console.log('  名簿テンプレの書式更新日: ' + stamp);
 }
 
 main();
