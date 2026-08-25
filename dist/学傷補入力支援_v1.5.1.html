@@ -194,15 +194,6 @@ input:disabled { background: #f2f3f5; color: var(--muted); }
   <p class="ver" id="version"></p>
 </header>
 
-<!-- ── 初回設定ゲート ───────────────────────────── -->
-<section id="gate" class="card warn hidden">
-  <h2>はじめに、あなたの情報を設定してください</h2>
-  <p>
-    ここが空のままだと、他の人の名前で申請してしまう事故が起きます。
-    設定が終わるまで名簿の作成とフォーム入力は使えません。
-  </p>
-</section>
-
 <!-- ── 1. 個人設定 ─────────────────────────────── -->
 <section class="card" id="sec-personal">
   <h2>1. あなたの情報 <span class="badge person">各自で入力</span></h2>
@@ -893,12 +884,6 @@ input:disabled { background: #f2f3f5; color: var(--muted); }
     try { localStorage.removeItem(KEY); } catch (e) { /* 消せなくても続行 */ }
   }
 
-  /** 個人設定が埋まっているか。埋まるまでは他の機能を使わせない。 */
-  function isPersonalReady(data) {
-    var p = data.personal, a = data.applicant;
-    return !!(p.氏名 && a.氏名 && a.メール);
-  }
-
   function newId() {
     return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   }
@@ -989,7 +974,7 @@ input:disabled { background: #f2f3f5; color: var(--muted); }
 
   root.Store = {
     load: load, save: save, clear: clear, blank: blank,
-    isPersonalReady: isPersonalReady, newId: newId,
+    newId: newId,
     exportData: exportData, importData: importData, EXPORT_FIELDS: EXPORT_FIELDS, EXPORT_TEMPLATES: EXPORT_TEMPLATES
   };
 })(window.GSH = window.GSH || {});
@@ -1441,7 +1426,7 @@ input:disabled { background: #f2f3f5; color: var(--muted); }
   var state = root.Store.load();
 
   // ビルド時に差し込まれる値
-  var BUILD = { version: '1.5.0', builtAt: '2026-08-25 22:35' };
+  var BUILD = { version: '1.5.1', builtAt: '2026-08-25 23:02' };
   var FORM_MAP = {"_readme":["フォームの設問と入力値の対応表。コードを触らずにここだけ直せばフォーム改変に追従できる。","","qid       : 設問ID。DOM の id=\"QuestionId_<qid>\" で引ける。設問を作り直さない限り不変なので、","            並び順が変わっても文言が変わってもこれで当たる。第一の特定手段。","matchKey  : 見出しを正規化した文字列。qid で引けなかったときの第二の手段。","exactOnly : true のときは matchKey の部分一致を禁止する。15.活動場所 は 14.活動場所（国内/海外）に","            包含されてしまうので、この2問に必要。","order     : 実測時の並び順。最終手段のインデックス照合と、見出しの先頭連番の検算に使う。","type      : text / textarea / radio / dropdown / date / file。操作方法が種別ごとに違う。","source    : 値の取り出し元。personal=操作者、applicant=申請者(本学教職員)、org=団体共通、draft=今回の活動、derived=自動算出。","choices   : フォームが要求する正式文字列。省略も英語部分の欠落も許されない（完全一致が必要）。","condition : 満たすときだけ入力する。dependsOn の『実際に入っている値』で判定すること。","","★ 選択肢の文字列は原文のまま。タイポグラフィ引用符（U+201C/U+201D）や、","  4番だけ『1.』の後に空白がある点まで実測どおり。ここを整形すると一致しなくなる。"],"formVersion":"2026-08-24","probedAt":"2026-08-25","formOrigin":"https://forms.cloud.microsoft","formPath":"/pages/responsepage.aspx","formId":"clGGs4eYOkuJ_5WjW5L0w8vMoAEoHbBGiN-zwPeXqL5UMjBZV0FUVlBWNFRIU0o5RTZLOVFVU0hOTyQlQCN0PWcu","shortUrl":"https://forms.office.com/r/CpCUfPQRA6","expectedCount":{"min":16,"max":18},"dateFormat":"yyyy/MM/dd","_prefill":["prefillPrefix : 事前入力のパラメータ名に付ける接頭辞。'' なら設問IDをそのまま、'r' なら r を前置する。","                両方を同時に送るとパラメータ数もURL長も倍になり、Forms 側の上限に当たって","                途中から無視される。実測で 2641 文字 → 片方だけなら 1386 文字。必ず片方に絞ること。","prefillMaxParams : 一度に載せる設問の上限。0 なら無制限。Forms が先頭 N 問しか処理しない","                   場合に使う。優先度の高い順に N 問だけ載せる。","prefillPriority  : 大きいほど死守する。URL が長すぎるときは小さい順に落とす。","                   長い自由記述は手で書けばよいので低く、選び直しが面倒な選択肢は高くする。"],"prefillPrefix":"","prefillMaxParams":0,"questions":[{"order":0,"qid":"r829848c24e95420e888e243416adbd6e","prefillPriority":90,"label":"申請者氏名","title":"1.申請者氏名単一行テキスト.","matchKey":"申請者氏名","type":"text","source":"applicant.氏名"},{"order":1,"qid":"r8201ab260350471fa970a10ddf643342","prefillPriority":90,"label":"申請者メールアドレス","title":"2.申請者メールアドレス Applicant's email address単一行テキスト.","matchKey":"申請者メールアドレスApplicant'semailaddress","type":"text","source":"applicant.メール"},{"order":2,"qid":"r802a462c85d1468ab474c949cab3c58d","prefillPriority":85,"label":"共有用メールアドレス","title":"3.共有用メールアドレス Email address to share the content with単一行テキスト.","matchKey":"共有用メールアドレスEmailaddresstosharethecontentwith","type":"text","source":"applicant.共有メール"},{"order":3,"qid":"ra7268c22275a48a0b642fb9044c7026c","prefillPriority":100,"label":"加入を希望する補償制度","title":"4.加入を希望する補償制度 Compensation system you wish to register単一選択.","matchKey":"加入を希望する補償制度Compensationsystemyouwishtoregister","type":"radio","source":"org.加入区分","choices":["1.　学傷補のみ加入  Register only for “Compensation for Injury”","2.　学傷補と学賠補　両方に加入　 Register for both “Compensation for Injury” and “Liability Coverage”"]},{"order":4,"qid":"r08ba9ed20b864472902fbf3d3daf9795","unlocksMore":true,"prefillPriority":95,"label":"活動の種類","title":"5.活動の種類 Type of activity単一選択.","matchKey":"活動の種類Typeofactivity","type":"radio","source":"org.活動区分","choices":["1.授業 Class","2.研究活動 Research Activities","3.インターンシップ Internship","4.ボランティア活動 Volunteer Activities","5.教育実習 Educational Practice","6.学校行事 School events","7.その他 Other"]},{"order":5,"qid":"r85ffd7ec7cc44039b23c0c3cf1ab31b4","prefillPriority":50,"label":"【授業の場合のみ】全員科目登録者か","title":"6.【上記質問で「1.授業」を選択した場合のみ】参加者は全員科目登録者ですか？ [If you selected \"1. Class\" for the above question] Are all participants registered for the course?単一選択.","matchKey":"【上記質問で「1.授業」を選択した場合のみ】参加者は全員科目登録者ですか？[Ifyouselected\"1.Class\"fortheabovequestion]Areallparticipantsregisteredforthecourse","type":"radio","source":"org.全員科目登録者","choices":["はい Yes","いいえ No"],"condition":{"dependsOn":"r08ba9ed20b864472902fbf3d3daf9795","startsWith":"1.授業"},"_note":"5番で「1.授業」を選んだときだけフォームに現れる。それ以外では触らない。"},{"order":6,"qid":"r791bdf527cb045b08eca774ed14eb659","prefillPriority":40,"label":"科目名/行事名/活動名","title":"7.科目名 / 行事名 / 活動名 Name of Subject / Event / Activity複数行テキスト.","matchKey":"科目名/行事名/活動名NameofSubject/Event/Activity","type":"textarea","source":"org.活動名"},{"order":7,"qid":"r524a1902a291405eb84e08daa4fd5458","prefillPriority":20,"label":"活動内容","title":"8.活動内容 Description of Activity複数行テキスト.","matchKey":"活動内容DescriptionofActivity","type":"textarea","source":"draft.活動内容"},{"order":8,"qid":"r055babb062ca4202bb615df4274266a7","unlocksMore":true,"prefillPriority":95,"label":"活動主管箇所名","title":"9.活動主管箇所名 Department responsible for the activity単一選択.","matchKey":"活動主管箇所名Departmentresponsiblefortheactivity","type":"dropdown","source":"org.申請先","choices":["政治経済学部 School of Political Science and Economics","法学部 School of Law","教育学部/教育学研究科 School of Education/Graduate School of Education","商学部/商学研究科 School of Commerce/Graduate School of Commerce","社会科学部/社会科学研究科 School of Social Sciences/Graduate School of Social Sciences","所沢総合事務センター（人科・スポ科　学部/研究科） Administrative Office, Tokorozawa","国際教養学部/国際コミュニケーション研究科 SILS/GSICCS","文学学術院事務所（文構/文/文研）Administrative Office, Faculty of Letters, Arts and Sciences","理工センター教学支援課（基幹・創造・先進理工学部/研究科）Academic and Student Affairs Section, Science and Engineering","政治学研究科 Graduate School of Political Science","経済学研究科 Graduate School of Economics","法学研究科 Graduate School of Law","アジア太平洋研究科 GSAPS","日本語教育研究科 Graduate School of Japanese Applied Linguistics","情報生産システム研究科 Graduate School of Information, Production and Systems","会計研究科 Graduate School of Accountancy","環境・エネルギー研究科 WEEE","経営管理研究科 Graduate School of Business and Finance","日本語教育研究センター Center for Japanese Language","留学センター CIE","平山郁夫記念ボランティアセンター（WAVOC）","競技スポーツセンター Athletic Center","グローバルエデュケーションセンター Global Education Center","教育企画課 Educational Planning Section","Global Citizenship Center","早稲田ポータルオフィス WPO","社会連携課 External Affairs and Fund-Raising Section","キャリアセンターCareer Center","学生生活課 Student Affairs Section","ICC","GSセンターGender and Sexuality Center","国際課 International Office","データ科学センター Center for Data Science","アントレプレナーシップセンター Center for Entrepreneurship","文化企画課 Cultural Planning Section","その他 Other"]},{"order":9,"qid":"r7cadf2f9359849d1aab19fc07494d1ff","prefillPriority":50,"label":"【その他の場合のみ】箇所名","title":"10.【上記質問で「その他」を選択した場合のみ】箇所名を以下に入力してください。 [If you selected \"Other\" for the above question] Please enter the name of the department below.単一行テキスト.","matchKey":"【上記質問で「その他」を選択した場合のみ】箇所名を以下に入力してください。[Ifyouselected\"Other\"fortheabovequestion]Pleaseenterthenameofthedepartmentbelow","type":"text","source":"org.申請先その他","condition":{"dependsOn":"r055babb062ca4202bb615df4274266a7","startsWith":"その他"},"_note":"8番で「その他 Other」を選んだときだけ入力する。それ以外では絶対に触らない。旧ブックマークレットはここに責任者名を書き込んでいた。"},{"order":10,"qid":"rb121068c2b55491787cc7975fb8d428c","prefillPriority":80,"label":"責任者名","title":"11.責任者名 Responsible person's name単一行テキスト.","matchKey":"責任者名Responsibleperson'sname","type":"text","source":"org.責任者名","_note":"旧ブックマークレットはここが空のままだった（1つ手前の9番に書き込んでいたため）。"},{"order":11,"qid":"r2249163124ac486d921ea6cb5f0ba4a3","prefillPriority":88,"label":"活動開始日","title":"12.活動開始日 Activity start date日付.","matchKey":"活動開始日Activitystartdate","type":"date","source":"draft.活動開始日"},{"order":12,"qid":"r2cb2bb95896c4746b78bcb197e33ad44","prefillPriority":88,"label":"活動終了日","title":"13.活動終了日 Activity end date日付.","matchKey":"活動終了日Activityenddate","type":"date","source":"draft.活動終了日"},{"order":13,"qid":"r04a227d9fe5c4dcbb6dbd869521a3f9f","prefillPriority":75,"label":"参加学生数","title":"14.参加学生数 Number of participating students単一行テキスト.","matchKey":"参加学生数Numberofparticipatingstudents","type":"text","numeric":true,"source":"derived.参加学生数"},{"order":14,"qid":"r00b622fab56749a2950854c57e46133f","prefillPriority":95,"label":"活動場所（国内/海外）","title":"15.活動場所（国内/海外）Location of activity (domestic/overseas)単一選択.","matchKey":"活動場所(国内/海外)Locationofactivity(domestic/overseas)","exactOnly":true,"type":"radio","source":"draft.国内外","choices":["1.国内 Domestic","2.海外 Overseas"],"_note":"旧ブックマークレットは1つ手前の13番をクリックしようとして、何も起きていなかった。"},{"order":15,"qid":"r45161e19dddf4ea9afca395a0b574454","prefillPriority":30,"label":"活動場所","title":"16.活動場所 Location of activity複数行テキスト.","matchKey":"活動場所Locationofactivity","exactOnly":true,"type":"textarea","source":"draft.活動場所","_note":"matchKey が14番に包含されるので、部分一致を禁止して完全一致のみ許可する。"},{"order":16,"qid":"r4b4e4085572a459989b5f120454cbd90","prefillPriority":0,"label":"参加者名簿","title":"17.参加者名簿 List of participants ※所定書式でご提出ください (非匿名の質問)ファイルのアップロード.","matchKey":"参加者名簿Listofparticipants※所定書式でご提出ください","type":"file","source":null,"_note":"自動添付は未対応。生成した名簿を手で選ぶ。"},{"order":17,"qid":"r1975cc93571f4519b76f6eeaeb7b4a16","prefillPriority":10,"label":"備考","title":"18.備考 Remarks複数行テキスト.","matchKey":"備考Remarks","type":"textarea","source":"draft.備考","_note":"既定は空。自動で何か書き込まない（大学に届く文面を勝手に作らない）。"}]};
 
   var CLOUDINARY_CONFIG = { cloudName: 'xx1zwaop', publicId: '学傷補_学賠補_活動届用_参加者名簿' };
@@ -1813,7 +1798,9 @@ input:disabled { background: #f2f3f5; color: var(--muted); }
 
   function collectIssues() {
     var out = [];
-    if (!root.Store.isPersonalReady(state)) out.push('「1. あなたの情報」の氏名と、「2. 申請者の情報」の氏名・メールアドレスを入れてください。');
+    if (!state.personal.氏名) out.push('「1. あなたの情報」の氏名を入れてください。');
+    if (!state.applicant.氏名) out.push('「2. 申請者の情報」の氏名を入れてください。');
+    if (!state.applicant.メール) out.push('「2. 申請者の情報」のメールアドレスを入れてください。');
     if (!state.org.加入区分) out.push('「3. 団体情報」の「加入を希望する補償制度」を選んでください。');
     if (!state.org.活動区分) out.push('「3. 団体情報」の「活動の種類」を選んでください。');
     if (!state.org.申請先) out.push('「3. 団体情報」の「申請先」を選んでください。');
@@ -2059,9 +2046,6 @@ input:disabled { background: #f2f3f5; color: var(--muted); }
   }
 
   function refresh() {
-    var ready = root.Store.isPersonalReady(state);
-    $('gate').classList.toggle('hidden', ready);
-    $('btn-roster').disabled = !ready;
     /* フォームと同じ条件でだけ欄を出す。条件を満たさない設問はフォームにも現れないので、
      * ここで値を持たせても使い道がなく、選ばせると誤った申請のもとになる。 */
     // 申請先が「その他」のときだけ、箇所名の入力欄を出す
@@ -2089,6 +2073,7 @@ input:disabled { background: #f2f3f5; color: var(--muted); }
     renderApplicantHistory();
     $('ap-share-use-own').checked = !!state.applicant.共有メール自分を使う;
     $('ap-share-mail').disabled = !!state.applicant.共有メール自分を使う;
+    $('shorten-url').checked = !!state.shortenUrl;
     refresh();
   }
 
@@ -2320,6 +2305,9 @@ input:disabled { background: #f2f3f5; color: var(--muted); }
       if (!confirm('この端末に保存した設定・メンバー辞書をすべて削除します。元に戻せません。よろしいですか？')) return;
       root.Store.clear();
       state = root.Store.blank();
+      $('m-sid').value = ''; $('m-kana').value = ''; $('m-name').value = '';
+      $('m-filter').value = '';
+      $('probe-paste').value = '';
       resyncFromState();
       setMsg($('io-msg'), '削除しました。', true);
     });
