@@ -77,11 +77,11 @@
     var dd = q.querySelector('[aria-haspopup="listbox"],[role="combobox"]');
     if (dd) {
       /* 未選択のドロップダウンは「選択してください」のようなプレースホルダを表示する。
-       * これを値として数えると「入っている」と誤判定してしまう（実際に誤判定した）。
-       * Forms は未選択のとき id が _placeholder_content で終わる要素を中に置くので、
-       * それがあれば空とみなす。 */
+       * これを値として数えると「入っている」と誤判定してしまう。
+       * プレースホルダ要素が存在する場合、そのテキストが「選択してください」なら未選択。 */
       var ph = dd.querySelector('[id$="_placeholder_content"]');
-      return { type: 'dropdown', value: ph ? '' : text(dd) };
+      var isUnselected = ph && text(ph) === '選択してください';
+      return { type: 'dropdown', value: isUnselected ? '' : text(dd) };
     }
 
     return { type: 'unknown', value: '' };
