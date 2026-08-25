@@ -10,26 +10,6 @@
   var FORM_MAP = __FORM_MAP__;
   var TEMPLATE_B64 = '__TEMPLATE_B64__';
 
-  // verify-lint.mjs の ID チェック用に、ここで使う全 ID を列挙
-  var ALL_IDS = {
-    'p-name': 1, 'p-kana': 1, 'p-sid': 1, 'p-mail1': 1, 'p-mail2': 1,
-    'p-name-chips': 1, 'p-mail1-chips': 1, 'p-mail2-chips': 1,
-    'p-name-save': 1, 'p-mail1-save': 1, 'p-mail2-save': 1,
-    'o-org': 1, 'o-act': 1, 'o-resp': 1, 'o-ins': 1, 'o-kind': 1,
-    'o-allreg': 1, 'o-window': 1, 'o-window-other': 1, 'o-place': 1, 'o-area': 1,
-    'org-preset-sel': 1, 'org-preset-save': 1, 'org-preset-del': 1, 'org-preset-row': 1,
-    'a-content': 1, 'a-place': 1, 'a-start': 1, 'a-end': 1, 'a-remarks': 1,
-    'preset-sel': 1, 'preset-save': 1, 'preset-del': 1, 'preset-row': 1,
-    'm-sid': 1, 'm-kana': 1, 'm-name': 1, 'm-add': 1, 'm-add-self': 1,
-    'm-filter': 1, 'm-all': 1, 'm-none': 1, 'm-count': 1,
-    'member-list': 1, 'sec-members': 1, 'gate': 1, 'btn-roster': 1, 'roster-msg': 1,
-    'save-target-section': 1, 'save-target-status': 1, 'btn-pick-folder': 1,
-    'shorten-url': 1, 'count-badge': 1, 'issues': 1, 'review': 1, 'io-msg': 1,
-    'bm-copy': 1, 'bm-text': 1, 'probe-link': 1, 'probe-apply': 1,
-    'btn-clear': 1, 'export-sel': 1, 'btn-export': 1, 'import-file': 1,
-    'version': 1, 'sec-activity': 1
-  };
-
   function templateBytes() {
     var bin = atob(TEMPLATE_B64);
     var out = new Uint8Array(bin.length);
@@ -85,7 +65,8 @@
   // ---- 双方向バインド ------------------------------------------------
   var FIELDS = [
     ['p-name', 'personal', '氏名'], ['p-kana', 'personal', 'カナ氏名'], ['p-sid', 'personal', '学籍番号'],
-    ['p-mail1', 'personal', '大学メール'], ['p-mail2', 'personal', '連絡先メール'],
+    ['p-mail', 'personal', 'メールアドレス'],
+    ['ap-name', 'applicant', '氏名'], ['ap-mail', 'applicant', 'メール'], ['ap-share-mail', 'applicant', '共有メール'],
     ['o-org', 'org', '団体名'], ['o-act', 'org', '活動名'], ['o-resp', 'org', '責任者名'],
     ['o-ins', 'org', '加入区分'], ['o-kind', 'org', '活動区分'],
     ['o-allreg', 'org', '全員科目登録者'], ['o-window', 'org', '申請先'],
@@ -106,11 +87,10 @@
     ['o-area', 'org.既定の国内外']
   ];
 
-  // 個人情報の辞書対象フィールド [input要素ID, state上のキー, state上のオブジェクト, chips要素ID, save要素ID]
+  // 申請者情報の辞書対象フィールド [input要素ID, state上のキー, state上のオブジェクト, chips要素ID, save要素ID]
   var HISTORY_FIELDS = [
-    ['p-name', 'personal', '氏名', 'p-name-chips', 'p-name-save'],
-    ['p-mail1', 'personal', '大学メール', 'p-mail1-chips', 'p-mail1-save'],
-    ['p-mail2', 'personal', '連絡先メール', 'p-mail2-chips', 'p-mail2-save']
+    ['ap-name', 'applicant', '氏名', 'ap-name-chips', 'ap-name-save'],
+    ['ap-mail', 'applicant', 'メール', 'ap-mail-chips', 'ap-mail-save']
   ];
 
   // 団体プリセットの対象フィールド（state.org のキー）
@@ -131,13 +111,37 @@
     });
   }
 
+  function syncSelfMember() {
+    var sid = state.personal.学籍番号 || '';
+    if (sid) {
+      state.members = state.members.filter(function (m) { return m.id === 'self' || m.学籍番号 !== sid; });
+    }
+    var self = state.members.filter(function (m) { return m.id === 'self'; })[0];
+    if (!self) {
+      self = { id: 'self', 学籍番号: '', カナ氏名: '', 表示名: '' };
+      state.members.unshift(self);
+    }
+    self.学籍番号 = sid;
+    self.カナ氏名 = state.personal.カナ氏名 || '';
+    self.表示名 = state.personal.氏名 || self.カナ氏名;
+  }
+
   function bindFields() {
     FIELDS.forEach(function (f) {
       var node = $(f[0]);
       node.value = state[f[1]][f[2]] || '';
       node.addEventListener('input', function () {
         state[f[1]][f[2]] = node.value;
-        if (f[1] === 'personal') { state.personal.設定日時 = state.personal.設定日時 || new Date().toISOString(); }
+        if (f[1] === 'personal') {
+          state.personal.設定日時 = state.personal.設定日時 || new Date().toISOString();
+          if (f[2] === '氏名' || f[2] === 'カナ氏名' || f[2] === '学籍番号') {
+            syncSelfMember();
+          }
+          if (f[2] === 'メールアドレス' && state.applicant.共有メール自分を使う) {
+            state.applicant.共有メール = node.value;
+            $('ap-share-mail').value = node.value;
+          }
+        }
         persist();
         refresh();
       });
@@ -208,7 +212,7 @@
       .forEach(function (m) {
         var problems = root.Roster.validateMember(m);
         var row = document.createElement('div');
-        row.className = 'member' + (problems.length ? ' bad' : '');
+        row.className = 'member' + (problems.length ? ' bad' : '') + (m.id === 'self' ? ' self' : '');
         if (problems.length) row.title = problems.join('\n');
 
         var lab = document.createElement('label');
@@ -237,14 +241,22 @@
         del.className = 'del';
         del.textContent = '✕';
         del.title = 'このメンバーを削除';
-        del.addEventListener('click', function () {
-          if (!confirm(m.表示名 + ' を辞書から削除します。よろしいですか？')) return;
-          state.members = state.members.filter(function (x) { return x.id !== m.id; });
-          state.draft.参加者 = (state.draft.参加者 || []).filter(function (id) { return id !== m.id; });
-          persist(); refresh();
-        });
 
-        row.appendChild(lab); row.appendChild(del);
+        if (m.id === 'self') {
+          del.style.display = 'none';
+          var tag = document.createElement('span');
+          tag.className = 'self-tag';
+          tag.textContent = 'あなた自身（削除不可）';
+          row.appendChild(lab); row.appendChild(tag);
+        } else {
+          del.addEventListener('click', function () {
+            if (!confirm(m.表示名 + ' を辞書から削除します。よろしいですか？')) return;
+            state.members = state.members.filter(function (x) { return x.id !== m.id; });
+            state.draft.参加者 = (state.draft.参加者 || []).filter(function (id) { return id !== m.id; });
+            persist(); refresh();
+          });
+          row.appendChild(lab); row.appendChild(del);
+        }
         box.appendChild(row);
       });
 
@@ -260,7 +272,11 @@
       alert('学籍番号 ' + sid + ' は既に登録されています。');
       return false;
     }
-    state.members.push({ id: root.Store.newId(), 学籍番号: sid, カナ氏名: kana, 表示名: name });
+    var m = { id: root.Store.newId(), 学籍番号: sid, カナ氏名: kana, 表示名: name };
+    state.members.push(m);
+    var s = new Set(state.draft.参加者 || []);
+    s.add(m.id);
+    state.draft.参加者 = Array.from(s);
     persist();
     return true;
   }
@@ -308,9 +324,9 @@
 
   function collectIssues() {
     var out = [];
-    if (!root.Store.isPersonalReady(state)) out.push('「1. あなたの情報」の氏名と大学のメールアドレスを入れてください。');
+    if (!root.Store.isPersonalReady(state)) out.push('「1. あなたの情報」の氏名と、「2. 申請者の情報」の氏名・メールアドレスを入れてください。');
     var members = selectedMembers();
-    if (!members.length) out.push('参加者が選ばれていません。「3. メンバー辞書」でチェックを入れてください。');
+    if (!members.length) out.push('参加者が選ばれていません。「4. メンバー辞書」でチェックを入れてください。');
     if (members.length > root.Roster.MAX_MEMBERS) {
       out.push('参加者が ' + members.length + ' 名です。このテンプレートは ' + root.Roster.MAX_MEMBERS + ' 名までです。');
     }
@@ -327,11 +343,12 @@
   }
 
   /* filler / prefill に渡す値。form-map.json の source 表記
-   * （personal.* / org.* / draft.* / derived.*）とそのまま対応させる。
+   * （personal.* / applicant.* / org.* / draft.* / derived.*）とそのまま対応させる。
    * 以前は settings.* に詰め替えていたが、対応表が二重管理になるのでやめた。 */
   function fillerValues() {
     return {
       personal: state.personal,
+      applicant: state.applicant,
       org: state.org,
       draft: Object.assign({}, state.draft, {
         活動場所: state.draft.活動場所 || state.org.既定の活動場所
@@ -362,7 +379,7 @@
     try {
       var v = fillerValues();
       var bytes = await root.Roster.generate(templateBytes(), {
-        申請者氏名: v.personal.氏名,
+        申請者氏名: v.applicant.氏名,
         活動名: v.org.活動名 || v.draft.活動内容,
         責任者名: v.org.責任者名,
         活動場所: v.draft.活動場所,
@@ -627,9 +644,6 @@
         refresh();
       }
     });
-    $('m-add-self').addEventListener('click', function () {
-      if (addMember(state.personal.学籍番号, state.personal.カナ氏名, state.personal.氏名)) refresh();
-    });
     $('m-filter').addEventListener('input', renderMembers);
     $('m-all').addEventListener('click', function () {
       state.draft.参加者 = state.members.map(function (m) { return m.id; });
@@ -644,6 +658,19 @@
       var inputId = f[0], objKey = f[1], stateKey = f[2], chipsId = f[3], saveId = f[4];
       renderFieldHistory(stateKey, chipsId, inputId);
       wireHistorySave(saveId, inputId, stateKey);
+    });
+
+    // 共有用メールアドレスの「自分のアドレスを使う」チェックボックス
+    $('ap-share-use-own').checked = !!state.applicant.共有メール自分を使う;
+    $('ap-share-mail').disabled = !!state.applicant.共有メール自分を使う;
+    $('ap-share-use-own').addEventListener('change', function () {
+      state.applicant.共有メール自分を使う = $('ap-share-use-own').checked;
+      if (state.applicant.共有メール自分を使う) {
+        state.applicant.共有メール = state.personal.メールアドレス || '';
+        $('ap-share-mail').value = state.applicant.共有メール;
+      }
+      $('ap-share-mail').disabled = state.applicant.共有メール自分を使う;
+      persist(); refresh();
     });
 
     // 団体情報プリセットのハンドラー登録
@@ -730,17 +757,40 @@
       );
     });
 
-    // データ入出力
-    var sel = $('exp-mode');
-    Object.keys(root.Store.MODES).forEach(function (k) {
-      var o = document.createElement('option');
-      o.value = k; o.textContent = root.Store.MODES[k].label;
-      sel.appendChild(o);
+    // データ入出力 - チェックボックスとテンプレートボタンの生成
+    var expBox = $('export-checks');
+    root.Store.EXPORT_FIELDS.forEach(function (f) {
+      var lab = document.createElement('label');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.id = 'exp-' + f.key;
+      lab.appendChild(cb);
+      lab.appendChild(document.createTextNode(f.label));
+      expBox.appendChild(lab);
     });
+
+    function applyExportTemplate(keys) {
+      root.Store.EXPORT_FIELDS.forEach(function (f) {
+        $('exp-' + f.key).checked = keys.indexOf(f.key) !== -1;
+      });
+    }
+    applyExportTemplate(root.Store.EXPORT_TEMPLATES.org.keys);
+
+    var tmplBox = $('export-templates-buttons');
+    Object.keys(root.Store.EXPORT_TEMPLATES).forEach(function (k) {
+      var t = root.Store.EXPORT_TEMPLATES[k];
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'ghost tiny';
+      btn.textContent = t.label;
+      btn.addEventListener('click', function () { applyExportTemplate(t.keys); });
+      tmplBox.appendChild(btn);
+    });
+
     $('btn-export').addEventListener('click', function () {
-      var mode = sel.value;
-      var json = root.Store.exportData(state, mode);
-      if (mode !== 'org' && !confirm('このファイルには個人情報が含まれます。共有範囲に注意してください。書き出しますか？')) return;
+      var keys = root.Store.EXPORT_FIELDS.map(function (f) { return f.key; }).filter(function (k) { return $('exp-' + k).checked; });
+      if (!keys.length) { setMsg($('io-msg'), '書き出す項目を1つ以上選んでください。', false); return; }
+      var json = root.Store.exportData(state, keys);
+      var sensitive = ['personal', 'applicant', 'history', 'members'].some(function (k) { return keys.indexOf(k) !== -1; });
+      if (sensitive && !confirm('このファイルには個人情報が含まれます。共有範囲に注意してください。書き出しますか？')) return;
       download(new TextEncoder().encode(json), '学傷補設定_' + (state.org.団体名 || '設定') + '_' + root.Roster.todayIso().replace(/-/g, '') + '.json', 'application/json');
       setMsg($('io-msg'), '書き出しました。', true);
     });
@@ -751,7 +801,7 @@
         try {
           var r = root.Store.importData(state, t);
           state = r.data; persist();
-          bindFields(); renderPresets(); renderOrgPresets(); refresh();
+          bindFields(); syncSelfMember(); renderPresets(); renderOrgPresets(); refresh();
           setMsg($('io-msg'), r.report.join(' / '), true);
         } catch (e) {
           setMsg($('io-msg'), '読み込めませんでした：' + (e && e.message || e), false);
@@ -763,7 +813,7 @@
       if (!confirm('この端末に保存した設定・メンバー辞書をすべて削除します。元に戻せません。よろしいですか？')) return;
       root.Store.clear();
       state = root.Store.blank();
-      bindFields(); renderPresets(); renderOrgPresets(); refresh();
+      bindFields(); syncSelfMember(); renderPresets(); renderOrgPresets(); refresh();
       setMsg($('io-msg'), '削除しました。', true);
     });
 
@@ -787,6 +837,7 @@
   populateSelects();
   var migrated = migrateChoiceValues();
   bindFields();
+  syncSelfMember();
   renderPresets();
   renderOrgPresets();
   wire();

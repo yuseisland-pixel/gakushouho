@@ -31,35 +31,48 @@
   <h2>1. あなたの情報 <span class="badge person">各自で入力</span></h2>
   <p class="note">この欄は人によって違います。配布されたファイルを使う場合も、ここは必ず自分で入れ直してください。</p>
   <div class="grid">
-    <div class="field-with-dict">
-      <label>氏名<input id="p-name" placeholder="早稲田 太郎"></label>
-      <div class="field-dict">
-        <div class="field-dict-chips" id="p-name-chips"></div>
-        <button type="button" id="p-name-save" class="ghost tiny">この値を辞書に保存</button>
-      </div>
-    </div>
+    <label>氏名<input id="p-name" placeholder="早稲田 太郎"></label>
     <label>カナ氏名<input id="p-kana" placeholder="ワセダ　タロウ"><small>名簿に使います。全角カナ、姓名の間は全角スペース</small></label>
     <label>学籍番号<input id="p-sid" placeholder="1A123456"><small>半角英数8桁。ハイフン以降は入れません</small></label>
-    <div class="field-with-dict">
-      <label>大学のメールアドレス<input id="p-mail1" placeholder="xxxx@waseda.jp"></label>
-      <div class="field-dict">
-        <div class="field-dict-chips" id="p-mail1-chips"></div>
-        <button type="button" id="p-mail1-save" class="ghost tiny">この値を辞書に保存</button>
-      </div>
-    </div>
-    <div class="field-with-dict">
-      <label>連絡先メールアドレス<input id="p-mail2" placeholder="xxxx@ruri.waseda.jp"></label>
-      <div class="field-dict">
-        <div class="field-dict-chips" id="p-mail2-chips"></div>
-        <button type="button" id="p-mail2-save" class="ghost tiny">この値を辞書に保存</button>
-      </div>
-    </div>
+    <label>メールアドレス<input id="p-mail" placeholder="xxxx@waseda.jp"></label>
   </div>
 </section>
 
-<!-- ── 2. 団体設定 ─────────────────────────────── -->
+<!-- ── 2. 申請者の情報 ─────────────────────────── -->
+<section class="card" id="sec-applicant">
+  <h2>2. 申請者の情報 <span class="badge person">本学教職員に限ります</span></h2>
+  <p class="note">
+    フォームの「申請者」として登録される、教職員の方の情報です。よく使う組み合わせは辞書に保存しておけます。
+  </p>
+  <div class="grid">
+    <div class="field-with-dict">
+      <label>氏名<input id="ap-name" placeholder="早稲田 花子"></label>
+      <div class="field-dict">
+        <div class="field-dict-chips" id="ap-name-chips"></div>
+        <button type="button" id="ap-name-save" class="ghost tiny">この値を辞書に保存</button>
+      </div>
+    </div>
+    <div class="field-with-dict">
+      <label>申請者メールアドレス<input id="ap-mail" placeholder="xxxx@waseda.jp"></label>
+      <div class="field-dict">
+        <div class="field-dict-chips" id="ap-mail-chips"></div>
+        <button type="button" id="ap-mail-save" class="ghost tiny">この値を辞書に保存</button>
+      </div>
+    </div>
+  </div>
+  <div class="share-mail-block">
+    <label><input type="checkbox" id="ap-share-use-own"> 共有用メールアドレスに「1. あなたの情報」のメールアドレスを使う</label>
+    <label>共有用メールアドレス<input id="ap-share-mail" placeholder="xxxx@waseda.jp"></label>
+    <p class="note">
+      ※上記以外に申請内容や承認・否認の状況を共有したいメールアドレスがあれば、入力してください。<br>
+      *Enter any other email address with which you would like to share the details of your application and the status of approval or rejection.
+    </p>
+  </div>
+</section>
+
+<!-- ── 3. 団体設定 ─────────────────────────────── -->
 <section class="card" id="sec-org">
-  <h2>2. 団体の情報 <span class="badge org">団体で共通</span></h2>
+  <h2>3. 団体の情報 <span class="badge org">団体で共通</span></h2>
   <p class="note">サークルで1人が設定して、JSON書き出しで配れば他の人は入力不要です。</p>
   <div class="preset-row" id="org-preset-row">
     <select id="org-preset-sel"><option value="">プリセットを選ぶ…</option></select>
@@ -81,9 +94,9 @@
   <p class="note">選択式の項目は、フォームの選択肢をそのまま並べています（英語まで含めて一致していないとフォーム側で弾かれるため）。</p>
 </section>
 
-<!-- ── 3. メンバー辞書 ─────────────────────────── -->
+<!-- ── 4. メンバー辞書 ─────────────────────────── -->
 <section class="card" id="sec-members">
-  <h2>3. メンバー辞書</h2>
+  <h2>4. メンバー辞書</h2>
   <p class="note">一度登録すれば、次回からはチェックを入れるだけで名簿に載ります。</p>
 
   <div class="subcard">
@@ -93,7 +106,6 @@
       <label>カナ氏名<input id="m-kana" placeholder="ワセダ　タロウ" size="18"></label>
       <label>表示名<input id="m-name" placeholder="早稲田太郎" size="14"></label>
       <button id="m-add" class="primary">追加</button>
-      <button id="m-add-self" class="ghost">自分を追加</button>
     </div>
   </div>
 
@@ -109,9 +121,9 @@
   </div>
 </section>
 
-<!-- ── 4. 活動情報 ─────────────────────────────── -->
+<!-- ── 5. 活動情報 ─────────────────────────────── -->
 <section class="card" id="sec-activity">
-  <h2>4. 今回の活動</h2>
+  <h2>5. 今回の活動</h2>
   <p class="note">ここに1回入れれば、フォームと名簿の両方に反映されます。名簿の申請年月日は本日の日付が自動で入ります。</p>
 
   <div class="preset-row">
@@ -134,9 +146,9 @@
   <p class="note" id="count-badge"></p>
 </section>
 
-<!-- ── 5. 出力 ─────────────────────────────────── -->
+<!-- ── 6. 出力 ─────────────────────────────────── -->
 <section class="card" id="sec-output">
-  <h2>5. 作る</h2>
+  <h2>6. 作る</h2>
   <div id="issues" class="issues hidden"></div>
 
   <div class="out-block">
@@ -173,7 +185,7 @@
       <span class="count" id="prefill-count"></span>
     </p>
     <p class="count">
-      <label><input type="checkbox" id="shorten-url"> URLを短くする（「URLが長すぎる」と言われたとき）</label>
+      <label><input type="checkbox" id="shorten-url"> URLを短くする（エラーが出た場合）</label>
     </p>
     <p class="count">このリンクには氏名とメールアドレスが含まれます。他人に送らないでください。</p>
     <div class="count" id="prefill-note"></div>
@@ -198,39 +210,46 @@
   </div>
 
   <div class="out-block">
-    <h3>③ 入らなかった項目を埋める（保険）</h3>
-    <p class="note">
-      ②で入りきらなかったときに使います。②で開いたフォームの上でこのブックマークをクリックすると、
-      <strong>15問すべてを埋め直します。</strong>画面右上に「どの設問に何が入ったか」の一覧が出ます。
-    </p>
-    <p>
-      <a id="bm-link" href="#" class="bookmarklet">学傷補・学賠補フォーム自動入力</a>
-      <span id="bm-size" class="count"></span>
-    </p>
-    <p class="note">
-      初回だけ、上の青いボタンを<strong>ブックマークバーにドラッグ</strong>して登録してください
-      （<code>Ctrl</code> + <code>Shift</code> + <code>B</code> でバーが出ます）。
-      <strong>登録は一度きり</strong>で、設定を変えても大学がフォームを変えても登録し直しは要りません。
-      <strong>入力後は必ず目で確認してから送信してください。</strong>
-    </p>
-    <details>
-      <summary>ドラッグできないとき（コードをコピーして手動でブックマークに貼る）</summary>
-      <textarea id="bm-text" rows="4" readonly></textarea>
-      <button id="bm-copy" class="ghost">コードをコピー</button>
+    <details id="bm-block">
+      <summary class="out-summary">③ 入らなかった項目を埋める</summary>
+      <p class="note">
+        ②で入りきらなかったときに使います。②で開いたフォームの上でこのブックマークをクリックすると、
+        <strong>15問すべてを埋め直します。</strong>画面右上に「どの設問に何が入ったか」の一覧が出ます。
+      </p>
+      <p>
+        <a id="bm-link" href="#" class="bookmarklet">学傷補・学賠補フォーム自動入力</a>
+        <span id="bm-size" class="count"></span>
+      </p>
+      <p class="note">
+        初回だけ、上の青いボタンを<strong>ブックマークバーにドラッグ</strong>して登録してください
+        （<code>Ctrl</code> + <code>Shift</code> + <code>B</code> でバーが出ます）。
+        <strong>登録は一度きり</strong>で、設定を変えても大学がフォームを変えても登録し直しは要りません。
+        <strong>入力後は必ず目で確認してから送信してください。</strong>
+      </p>
+      <details>
+        <summary>ドラッグできないとき（コードをコピーして手動でブックマークに貼る）</summary>
+        <textarea id="bm-text" rows="4" readonly></textarea>
+        <button id="bm-copy" class="ghost">コードをコピー</button>
+      </details>
+      <p class="warnbox" id="bm-warn"></p>
     </details>
-    <p class="warnbox" id="bm-warn"></p>
   </div>
 </section>
 
-<!-- ── 6. データ管理 ───────────────────────────── -->
+<!-- ── 7. データ管理 ───────────────────────────── -->
 <section class="card" id="sec-data">
-  <h2>6. 設定の保存・受け渡し</h2>
+  <h2>7. 設定の保存・受け渡し</h2>
+  <p class="note">書き出したい項目にチェックを入れてください。テンプレートボタンでよくある組み合わせを一括選択できます。</p>
+
+  <div class="export-templates" id="export-templates-buttons"></div>
+  <div class="export-checks" id="export-checks"></div>
+
   <p class="note">
-    書き出したファイルには参加者の学籍番号と氏名が入ります。共有範囲に注意してください。
+    書き出したファイルには、チェックした項目の内容がそのまま入ります。メンバー辞書や申請者情報を含む場合、参加者の学籍番号・氏名や個人のメールアドレスが含まれるので共有範囲に注意してください。
   </p>
+
   <div class="io-row">
-    <select id="exp-mode"></select>
-    <button id="btn-export" class="ghost">JSONで書き出す</button>
+    <button id="btn-export" class="ghost">チェックした項目をJSONで書き出す</button>
     <label class="filebtn">JSONを読み込む<input id="imp-file" type="file" accept="application/json,.json"></label>
     <button id="btn-clear" class="danger">この端末のデータを全部消す</button>
   </div>

@@ -49,8 +49,12 @@ function choiceOf(qid, index) {
 const VALUES = {
   personal: {
     氏名: 'テスト 太郎',
-    大学メール: 'test@waseda.jp',
-    連絡先メール: 'test@ruri.waseda.jp'
+    メールアドレス: 'test@waseda.jp'
+  },
+  applicant: {
+    氏名: 'テスト 花子',
+    メール: 'test@waseda.jp',
+    共有メール: 'test@ruri.waseda.jp'
   },
   org: {
     活動名: 'テスト同好会での活動',
@@ -171,9 +175,9 @@ if (!r1) { console.log('  NG   結果を回収できませんでした'); proces
 if (r1.error) { console.log('  NG   ' + r1.error); process.exit(1); }
 
 const S = r1.state;
-check('申請者氏名', byLabel(S, '申請者氏名').value === VALUES.personal.氏名, byLabel(S, '申請者氏名').value);
-check('申請者メールアドレス', byLabel(S, '申請者メールアドレス').value === VALUES.personal.大学メール, byLabel(S, '申請者メールアドレス').value);
-check('共有用メールアドレス', byLabel(S, '共有用メールアドレス').value === VALUES.personal.連絡先メール, byLabel(S, '共有用メールアドレス').value);
+check('申請者氏名', byLabel(S, '申請者氏名').value === VALUES.applicant.氏名, byLabel(S, '申請者氏名').value);
+check('申請者メールアドレス', byLabel(S, '申請者メールアドレス').value === VALUES.applicant.メール, byLabel(S, '申請者メールアドレス').value);
+check('共有用メールアドレス', byLabel(S, '共有用メールアドレス').value === VALUES.applicant.共有メール, byLabel(S, '共有用メールアドレス').value);
 check('加入を希望する補償制度（引用符と全角空白を含む長い選択肢）', byLabel(S, '加入を希望する補償制度').checked === VALUES.org.加入区分, byLabel(S, '加入を希望する補償制度').checked);
 check('活動の種類（区切りが NBSP の選択肢）', byLabel(S, '活動の種類').checked === VALUES.org.活動区分, byLabel(S, '活動の種類').checked);
 check('科目名/行事名/活動名', byLabel(S, '科目名/行事名/活動名').value === VALUES.org.活動名, byLabel(S, '科目名/行事名/活動名').value);
@@ -321,7 +325,7 @@ const rNoId = runFiller(buildMockForm({ stripIds: true }));
 if (rNoId && !rNoId.error) {
   const U = rNoId.state;
   check('見出し一致に落ちて入力できる',
-    byLabel(U, '申請者氏名').value === VALUES.personal.氏名, byLabel(U, '申請者氏名').value);
+    byLabel(U, '申請者氏名').value === VALUES.applicant.氏名, byLabel(U, '申請者氏名').value);
   // 「活動場所」と「活動場所（国内/海外）」は見出しが紛らわしい。取り違えないこと
   check('紛らわしい「活動場所」を取り違えない',
     byLabel(U, '活動場所').value === VALUES.draft.活動場所 && !byLabel(U, '活動場所（国内/海外）').value,
@@ -400,7 +404,7 @@ const rHash = runFiller(buildMockForm(), { delivery: 'hash' });
 if (rHash && !rHash.error) {
   const H = rHash.state;
   check('# から値を受け取って記入できる',
-    byLabel(H, '申請者氏名').value === VALUES.personal.氏名, byLabel(H, '申請者氏名').value);
+    byLabel(H, '申請者氏名').value === VALUES.applicant.氏名, byLabel(H, '申請者氏名').value);
   check('選択肢もドロップダウンも埋まる',
     byLabel(H, '加入を希望する補償制度').checked === VALUES.org.加入区分
       && byLabel(H, '活動主管箇所名').dropdown === VALUES.org.申請先,
