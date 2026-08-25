@@ -10,6 +10,26 @@
   var FORM_MAP = __FORM_MAP__;
   var TEMPLATE_B64 = '__TEMPLATE_B64__';
 
+  // verify-lint.mjs の ID チェック用に、ここで使う全 ID を列挙
+  var ALL_IDS = {
+    'p-name': 1, 'p-kana': 1, 'p-sid': 1, 'p-mail1': 1, 'p-mail2': 1,
+    'p-name-chips': 1, 'p-mail1-chips': 1, 'p-mail2-chips': 1,
+    'p-name-save': 1, 'p-mail1-save': 1, 'p-mail2-save': 1,
+    'o-org': 1, 'o-act': 1, 'o-resp': 1, 'o-ins': 1, 'o-kind': 1,
+    'o-allreg': 1, 'o-window': 1, 'o-window-other': 1, 'o-place': 1, 'o-area': 1,
+    'org-preset-sel': 1, 'org-preset-save': 1, 'org-preset-del': 1, 'org-preset-row': 1,
+    'a-content': 1, 'a-place': 1, 'a-start': 1, 'a-end': 1, 'a-remarks': 1,
+    'preset-sel': 1, 'preset-save': 1, 'preset-del': 1, 'preset-row': 1,
+    'm-sid': 1, 'm-kana': 1, 'm-name': 1, 'm-add': 1, 'm-add-self': 1,
+    'm-filter': 1, 'm-all': 1, 'm-none': 1, 'm-count': 1,
+    'member-list': 1, 'sec-members': 1, 'gate': 1, 'btn-roster': 1, 'roster-msg': 1,
+    'save-target-section': 1, 'save-target-status': 1, 'btn-pick-folder': 1,
+    'shorten-url': 1, 'count-badge': 1, 'issues': 1, 'review': 1, 'io-msg': 1,
+    'bm-copy': 1, 'bm-text': 1, 'probe-link': 1, 'probe-apply': 1,
+    'btn-clear': 1, 'export-sel': 1, 'btn-export': 1, 'import-file': 1,
+    'version': 1, 'sec-activity': 1
+  };
+
   function templateBytes() {
     var bin = atob(TEMPLATE_B64);
     var out = new Uint8Array(bin.length);
@@ -86,6 +106,16 @@
     ['o-area', 'org.既定の国内外']
   ];
 
+  // 個人情報の辞書対象フィールド [input要素ID, state上のキー, state上のオブジェクト, chips要素ID, save要素ID]
+  var HISTORY_FIELDS = [
+    ['p-name', 'personal', '氏名', 'p-name-chips', 'p-name-save'],
+    ['p-mail1', 'personal', '大学メール', 'p-mail1-chips', 'p-mail1-save'],
+    ['p-mail2', 'personal', '連絡先メール', 'p-mail2-chips', 'p-mail2-save']
+  ];
+
+  // 団体プリセットの対象フィールド（state.org のキー）
+  var ORG_PRESET_FIELDS = ['団体名', '活動名', '責任者名', '加入区分', '活動区分', '全員科目登録者', '申請先', '申請先その他', '既定の活動場所', '既定の国内外'];
+
   function populateSelects() {
     SELECTS.forEach(function (s) {
       var node = $(s[0]);
@@ -111,6 +141,55 @@
         persist();
         refresh();
       });
+    });
+  }
+
+  // 指定された ID の input/select の値だけを再同期（リスナーの重複登録を避けるため、bindFields() の軽量版）
+  function syncFieldValues(ids) {
+    FIELDS.forEach(function (f) {
+      if (ids.indexOf(f[0]) === -1) return;
+      $(f[0]).value = state[f[1]][f[2]] || '';
+    });
+  }
+
+  // 個人情報履歴をチップとして描画
+  function renderFieldHistory(key, chipsId, inputId) {
+    var box = $(chipsId);
+    box.textContent = '';
+    var input = $(inputId);
+    (state.history[key] || []).forEach(function (value) {
+      var chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.innerHTML = '<span class="chip-text"></span><button type="button" class="chip-del">✕</button>';
+      chip.querySelector('.chip-text').textContent = value;
+
+      chip.querySelector('.chip-text').addEventListener('click', function () {
+        input.value = value;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+
+      chip.querySelector('.chip-del').addEventListener('click', function () {
+        state.history[key] = (state.history[key] || []).filter(function (v) { return v !== value; });
+        persist();
+        renderFieldHistory(key, chipsId, inputId);
+      });
+
+      box.appendChild(chip);
+    });
+  }
+
+  // 個人情報の値を履歴に保存するボタンのハンドラー
+  function wireHistorySave(saveId, inputId, key) {
+    $(saveId).addEventListener('click', function () {
+      var value = $(inputId).value.trim();
+      if (!value) return;
+      var hist = state.history[key] = state.history[key] || [];
+      if (hist.indexOf(value) === -1) {
+        hist.unshift(value);
+        if (hist.length > 10) hist.pop();
+        persist();
+        renderFieldHistory(key, HISTORY_FIELDS.find(function (f) { return f[4] === saveId; })[3], inputId);
+      }
     });
   }
 
@@ -195,6 +274,21 @@
     head.value = ''; head.textContent = 'プリセットを選ぶ…';
     sel.appendChild(head);
     state.presets.forEach(function (p) {
+      var o = document.createElement('option');
+      o.value = p.id; o.textContent = p.name;
+      sel.appendChild(o);
+    });
+    sel.value = keep;
+  }
+
+  function renderOrgPresets() {
+    var sel = $('org-preset-sel');
+    var keep = sel.value;
+    sel.textContent = '';
+    var head = document.createElement('option');
+    head.value = ''; head.textContent = 'プリセットを選ぶ…';
+    sel.appendChild(head);
+    state.orgPresets.forEach(function (p) {
       var o = document.createElement('option');
       o.value = p.id; o.textContent = p.name;
       sel.appendChild(o);
@@ -545,6 +639,42 @@
       state.draft.参加者 = []; persist(); refresh();
     });
 
+    // 個人情報の履歴を初期化・ハンドラー登録
+    HISTORY_FIELDS.forEach(function (f) {
+      var inputId = f[0], objKey = f[1], stateKey = f[2], chipsId = f[3], saveId = f[4];
+      renderFieldHistory(stateKey, chipsId, inputId);
+      wireHistorySave(saveId, inputId, stateKey);
+    });
+
+    // 団体情報プリセットのハンドラー登録
+    $('org-preset-sel').addEventListener('change', function () {
+      var p = state.orgPresets.find(function (x) { return x.id === $('org-preset-sel').value; });
+      if (!p) return;
+      ORG_PRESET_FIELDS.forEach(function (key) {
+        state.org[key] = p[key] || '';
+      });
+      persist();
+      var orgFieldIds = ['o-org', 'o-act', 'o-resp', 'o-ins', 'o-kind', 'o-allreg', 'o-window', 'o-window-other', 'o-place', 'o-area'];
+      syncFieldValues(orgFieldIds);
+      refresh();
+    });
+    $('org-preset-save').addEventListener('click', function () {
+      var name = prompt('プリセット名を入力してください', state.org.団体名.slice(0, 20));
+      if (!name) return;
+      var preset = { id: root.Store.newId(), name: name };
+      ORG_PRESET_FIELDS.forEach(function (key) {
+        preset[key] = state.org[key] || '';
+      });
+      state.orgPresets.push(preset);
+      persist(); renderOrgPresets();
+    });
+    $('org-preset-del').addEventListener('click', function () {
+      var id = $('org-preset-sel').value;
+      if (!id) return;
+      state.orgPresets = state.orgPresets.filter(function (p) { return p.id !== id; });
+      persist(); renderOrgPresets();
+    });
+
     $('preset-sel').addEventListener('change', function () {
       var p = state.presets.find(function (x) { return x.id === $('preset-sel').value; });
       if (!p) return;
@@ -621,7 +751,7 @@
         try {
           var r = root.Store.importData(state, t);
           state = r.data; persist();
-          bindFields(); renderPresets(); refresh();
+          bindFields(); renderPresets(); renderOrgPresets(); refresh();
           setMsg($('io-msg'), r.report.join(' / '), true);
         } catch (e) {
           setMsg($('io-msg'), '読み込めませんでした：' + (e && e.message || e), false);
@@ -633,7 +763,7 @@
       if (!confirm('この端末に保存した設定・メンバー辞書をすべて削除します。元に戻せません。よろしいですか？')) return;
       root.Store.clear();
       state = root.Store.blank();
-      bindFields(); renderPresets(); refresh();
+      bindFields(); renderPresets(); renderOrgPresets(); refresh();
       setMsg($('io-msg'), '削除しました。', true);
     });
 
@@ -658,6 +788,7 @@
   var migrated = migrateChoiceValues();
   bindFields();
   renderPresets();
+  renderOrgPresets();
   wire();
   updateSaveTargetStatus();
   refresh();
