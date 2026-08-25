@@ -9,7 +9,7 @@
     "            包含されてしまうので、この2問に必要。",
     "order     : 実測時の並び順。最終手段のインデックス照合と、見出しの先頭連番の検算に使う。",
     "type      : text / textarea / radio / dropdown / date / file。操作方法が種別ごとに違う。",
-    "source    : 値の取り出し元。personal=各自、org=団体共通、draft=今回の活動、derived=自動算出。",
+    "source    : 値の取り出し元。personal=操作者、applicant=申請者(本学教職員)、org=団体共通、draft=今回の活動、derived=自動算出。",
     "choices   : フォームが要求する正式文字列。省略も英語部分の欠落も許されない（完全一致が必要）。",
     "condition : 満たすときだけ入力する。dependsOn の『実際に入っている値』で判定すること。",
     "",
@@ -47,7 +47,7 @@
       "title": "1.申請者氏名単一行テキスト.",
       "matchKey": "申請者氏名",
       "type": "text",
-      "source": "personal.氏名"
+      "source": "applicant.氏名"
     },
     {
       "order": 1,
@@ -57,7 +57,7 @@
       "title": "2.申請者メールアドレス Applicant's email address単一行テキスト.",
       "matchKey": "申請者メールアドレスApplicant'semailaddress",
       "type": "text",
-      "source": "personal.大学メール"
+      "source": "applicant.メール"
     },
     {
       "order": 2,
@@ -67,7 +67,7 @@
       "title": "3.共有用メールアドレス Email address to share the content with単一行テキスト.",
       "matchKey": "共有用メールアドレスEmailaddresstosharethecontentwith",
       "type": "text",
-      "source": "personal.連絡先メール"
+      "source": "applicant.共有メール"
     },
     {
       "order": 3,

@@ -15,8 +15,11 @@
       schemaVersion: SCHEMA,
       personal: {
         氏名: '', カナ氏名: '', 学籍番号: '',
-        大学メール: '', 連絡先メール: '',
+        メールアドレス: '',
         設定日時: ''
+      },
+      applicant: {
+        氏名: '', メール: '', 共有メール: '', 共有メール自分を使う: false
       },
       /* 選択式の項目は、フォームが要求する正式文字列をそのまま持つ。
        * 「学生生活課」ではなく「学生生活課 Student Affairs Section」。
@@ -33,7 +36,7 @@
       members: [],
       presets: [],
       orgPresets: [],
-      history: { 氏名: [], 大学メール: [], 連絡先メール: [] },
+      history: { 氏名: [], メール: [] },
       formMap: null,        // 調査ブックマークレットの結果を取り込んだら入る
       /* 事前入力のパラメータ名の綴り。実機でしか判定できないので、
        * 利用者が「効いたほう」を選んだ結果をここに保存する。
@@ -58,7 +61,7 @@
     if (!data || data.schemaVersion !== SCHEMA) return blank();
     // 後から足したキーが欠けていても落ちないように、既定値で埋める
     var base = blank();
-    ['personal', 'org', 'draft'].forEach(function (k) {
+    ['personal', 'org', 'applicant', 'draft'].forEach(function (k) {
       data[k] = Object.assign({}, base[k], data[k] || {});
     });
     data.members = data.members || [];
@@ -96,8 +99,8 @@
 
   /** 個人設定が埋まっているか。埋まるまでは他の機能を使わせない。 */
   function isPersonalReady(data) {
-    var p = data.personal;
-    return !!(p.氏名 && p.大学メール);
+    var p = data.personal, a = data.applicant;
+    return !!(p.氏名 && a.氏名 && a.メール);
   }
 
   function newId() {
@@ -105,18 +108,26 @@
   }
 
   // ---- エクスポート/インポート ------------------------------------
-  // 3モード。「団体配布用」だけは personal を物理的に含めない。
-  var MODES = {
-    org: { label: '団体配布用(個人情報を含めない)', keys: ['org', 'members', 'presets', 'orgPresets', 'formMap'] },
-    all: { label: '端末移行用(すべて)', keys: ['personal', 'org', 'members', 'presets', 'orgPresets', 'history', 'formMap'] },
+  var EXPORT_FIELDS = [
+    { key: 'personal', label: 'あなたの情報' },
+    { key: 'applicant', label: '申請者の情報（現在の入力値）' },
+    { key: 'history', label: '申請者の辞書（保存した候補）' },
+    { key: 'org', label: '団体の情報（現在の入力値）' },
+    { key: 'orgPresets', label: '団体プリセット' },
+    { key: 'members', label: 'メンバー辞書' },
+    { key: 'presets', label: '活動プリセット' },
+    { key: 'formMap', label: '設問マッピング' }
+  ];
+  var EXPORT_TEMPLATES = {
+    all: { label: '端末引継ぎ用（すべて）', keys: EXPORT_FIELDS.map(function (f) { return f.key; }) },
+    org: { label: '団体配布用（個人情報を除く）', keys: ['org', 'orgPresets', 'members', 'presets', 'formMap'] },
     members: { label: 'メンバー辞書のみ', keys: ['members'] }
   };
 
-  function exportData(data, mode) {
-    var spec = MODES[mode] || MODES.org;
-    var out = { schemaVersion: SCHEMA, exportMode: mode, exportedAt: new Date().toISOString() };
-    spec.keys.forEach(function (k) { out[k] = data[k]; });
-    if (mode !== 'org' || (data.members && data.members.length)) {
+  function exportData(data, keys) {
+    var out = { schemaVersion: SCHEMA, exportKeys: keys.slice(), exportedAt: new Date().toISOString() };
+    keys.forEach(function (k) { out[k] = data[k]; });
+    if (keys.indexOf('members') !== -1 && data.members && data.members.length) {
       out._注意 = 'このファイルには参加者の学籍番号と氏名が含まれます。共有範囲に注意してください。';
     }
     return JSON.stringify(out, null, 2);
@@ -124,7 +135,7 @@
 
   /**
    * インポート。members は学籍番号をキーに重複排除する。
-   * personal は「端末移行用」を読み込んだときだけ上書きする。
+   * personal/applicant は「端末移行用」を読み込んだときだけ上書きする。
    */
   function importData(current, json) {
     var incoming = JSON.parse(json);
@@ -137,6 +148,10 @@
     if (incoming.personal) {
       next.personal = Object.assign({}, next.personal, incoming.personal);
       report.push('個人設定を上書きしました');
+    }
+    if (incoming.applicant) {
+      next.applicant = Object.assign({}, next.applicant, incoming.applicant);
+      report.push('申請者の情報を取り込みました');
     }
     if (incoming.org) {
       next.org = Object.assign({}, next.org, incoming.org);
@@ -152,7 +167,7 @@
     }
     if (incoming.history) {
       next.history = incoming.history;
-      report.push('個人情報の履歴を取り込みました');
+      report.push('申請者の辞書を取り込みました');
     }
     if (incoming.formMap) {
       next.formMap = incoming.formMap;
@@ -174,6 +189,6 @@
   root.Store = {
     load: load, save: save, clear: clear, blank: blank,
     isPersonalReady: isPersonalReady, newId: newId,
-    exportData: exportData, importData: importData, MODES: MODES
+    exportData: exportData, importData: importData, EXPORT_FIELDS: EXPORT_FIELDS, EXPORT_TEMPLATES: EXPORT_TEMPLATES
   };
 })(window.GSH = window.GSH || {});

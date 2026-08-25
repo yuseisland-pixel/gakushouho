@@ -107,8 +107,8 @@ console.log('\n事前入力 URL の組み立て');
   };
   // 値はすべて ZZ 始まりのダミー。実在の氏名やメールは検証にも置かない
   const V = {
-    'personal.氏名': 'ZZ検証 太郎', 'personal.大学メール': 'zz-test@example.invalid',
-    'personal.連絡先メール': 'zz-test2@example.invalid',
+    'personal.氏名': 'ZZ検証 太郎', 'applicant.メール': 'zz-test@example.invalid',
+    'applicant.共有メール': 'zz-test2@example.invalid', 'applicant.氏名': 'ZZ検証 花子',
     'org.加入区分': choice('ra7268c22275a48a0b642fb9044c7026c', 0),
     'org.活動区分': choice('r08ba9ed20b864472902fbf3d3daf9795', 6),
     'org.全員科目登録者': choice('r85ffd7ec7cc44039b23c0c3cf1ab31b4', 0),
