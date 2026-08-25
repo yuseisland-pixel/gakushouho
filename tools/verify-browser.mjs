@@ -61,7 +61,7 @@ const PROBE = `
     // テンプレは実行時に Cloudinary から取得するため、ここではスキップ
     t('テンプレ取得は実行時（Cloudinary）', true, 'localStorage キャッシュ + フォールバック対応');
 
-    /* ★ AADSTS90015 の再発防止。実際に生成されたリンクを測る。
+    /* AADSTS90015 の再発防止。実際に生成されたリンクを測る。
      * 未サインインで開くと元URL全体が認証リクエストに埋め込まれるので、
      * サーバに送られるクエリ部が長いとサインインごと失敗する。 */
     var a = document.getElementById('prefill-link');

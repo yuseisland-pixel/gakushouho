@@ -12,6 +12,16 @@
   var CLOUDINARY_CONFIG = { cloudName: 'xx1zwaop', publicId: '学傷補_学賠補_活動届用_参加者名簿' };
   var TEMPLATE_CACHE_KEY = '__gsh_template_b64__';
 
+  // String.fromCharCode.apply は引数上限でスタックオーバーフローするため、チャンクに分けて変換する
+  function bytesToB64(bytes) {
+    var CHUNK = 8192;
+    var bin = '';
+    for (var i = 0; i < bytes.length; i += CHUNK) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+    }
+    return btoa(bin);
+  }
+
   async function templateBytes() {
     var cached = localStorage.getItem(TEMPLATE_CACHE_KEY);
     if (cached) {
@@ -24,14 +34,11 @@
     try {
       var url = 'https://res.cloudinary.com/' + CLOUDINARY_CONFIG.cloudName + '/raw/upload/' + CLOUDINARY_CONFIG.publicId + '.xlsx';
       var res = await fetch(url, { mode: 'cors' });
-      if (res.ok) {
-        var blob = await res.blob();
-        var arrayBuf = await blob.arrayBuffer();
-        var bytes = new Uint8Array(arrayBuf);
-        var b64 = btoa(String.fromCharCode.apply(null, bytes));
-        localStorage.setItem(TEMPLATE_CACHE_KEY, b64);
-        return bytes;
-      }
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      var arrayBuf = await (await res.blob()).arrayBuffer();
+      var bytes = new Uint8Array(arrayBuf);
+      localStorage.setItem(TEMPLATE_CACHE_KEY, bytesToB64(bytes));
+      return bytes;
     } catch (e) {
       setMsg($('roster-msg'), 'テンプレートの取得に失敗しました。ファイルを選択してください。', false);
     }
@@ -45,11 +52,8 @@
         if (file) {
           var reader = new FileReader();
           reader.onload = function (e) {
-            var buf = e.target.result;
-            var bytes = new Uint8Array(buf);
-            var bin = String.fromCharCode.apply(null, bytes);
-            var b64 = btoa(bin);
-            localStorage.setItem(TEMPLATE_CACHE_KEY, b64);
+            var bytes = new Uint8Array(e.target.result);
+            localStorage.setItem(TEMPLATE_CACHE_KEY, bytesToB64(bytes));
             resolve(bytes);
           };
           reader.onerror = function () { reject(reader.error); };
@@ -212,7 +216,7 @@
     hist.forEach(function (item) {
       var chip = document.createElement('span');
       chip.className = 'chip';
-      chip.innerHTML = '<span class="chip-text"></span><button type="button" class="chip-del">✕</button>';
+      chip.innerHTML = '<span class="chip-text"></span><button type="button" class="chip-del">×</button>';
       chip.querySelector('.chip-text').textContent = (item.氏名 || '') + '　<' + (item.メール || '') + '>';
 
       chip.querySelector('.chip-text').addEventListener('click', function () {
@@ -284,14 +288,14 @@
         var b = document.createElement('b');
         b.textContent = m.表示名 || m.カナ氏名;
         var s2 = document.createElement('span');
-        s2.textContent = m.学籍番号 + ' / ' + m.カナ氏名 + (problems.length ? '  ⚠ 書式要確認' : '');
+        s2.textContent = m.学籍番号 + ' / ' + m.カナ氏名 + (problems.length ? '  [書式要確認]' : '');
         who.appendChild(b); who.appendChild(s2);
 
         lab.appendChild(cb); lab.appendChild(who);
 
         var del = document.createElement('button');
         del.className = 'del';
-        del.textContent = '✕';
+        del.textContent = '×';
         del.title = 'このメンバーを削除';
 
         if (m.id === 'self') {
@@ -381,11 +385,11 @@
     if (!state.personal.氏名) out.push('「1. あなたの情報」の氏名を入れてください。');
     if (!state.applicant.氏名) out.push('「2. 申請者の情報」の氏名を入れてください。');
     if (!state.applicant.メール) out.push('「2. 申請者の情報」のメールアドレスを入れてください。');
-    if (!state.org.加入区分) out.push('「3. 団体情報」の「加入を希望する補償制度」を選んでください。');
-    if (!state.org.活動区分) out.push('「3. 団体情報」の「活動の種類」を選んでください。');
-    if (!state.org.申請先) out.push('「3. 団体情報」の「申請先」を選んでください。');
+    if (!state.org.加入区分) out.push('「3. 団体の情報」の「加入を希望する補償制度」を選んでください。');
+    if (!state.org.活動区分) out.push('「3. 団体の情報」の「活動の種類」を選んでください。');
+    if (!state.org.申請先) out.push('「3. 団体の情報」の「申請先」を選んでください。');
     if (String(state.org.活動区分 || '').indexOf('1.授業') === 0 && !state.org.全員科目登録者) {
-      out.push('「3. 団体情報」の「全員科目登録者か」を選んでください。');
+      out.push('「3. 団体の情報」の「全員科目登録者か」を選んでください。');
     }
     var members = selectedMembers();
     if (!members.length) out.push('参加者が選ばれていません。「4. メンバー辞書」でチェックを入れてください。');
@@ -694,14 +698,13 @@
   // ---- 保存先フォルダの状態管理 -----------------------------------------
   async function updateSaveTargetStatus() {
     var statusEl = $('save-target-status');
-    var pickBtn = $('btn-pick-folder');
     if (!root.SaveTarget.isSupported()) {
       $('save-target-section').style.display = 'none';
       return;
     }
     var handle = await root.SaveTarget.getSavedFolderHandle();
     if (handle) {
-      statusEl.textContent = '✓ フォルダが選択されています';
+      statusEl.textContent = 'フォルダが選択されています';
       statusEl.style.color = '#2e7d32';
     } else {
       statusEl.textContent = '未選択';
@@ -710,9 +713,7 @@
   }
 
   // ---- 起動 ----------------------------------------------------------
-  function wire() {
-    $('version').textContent = 'バージョン ' + BUILD.version + '（ビルド ' + BUILD.builtAt + '）';
-
+  function wireMembers() {
     $('m-add').addEventListener('click', function () {
       if (addMember($('m-sid').value, $('m-kana').value, $('m-name').value)) {
         $('m-sid').value = ''; $('m-kana').value = ''; $('m-name').value = '';
@@ -727,8 +728,9 @@
     $('m-none').addEventListener('click', function () {
       state.draft.参加者 = []; persist(); refresh();
     });
+  }
 
-    // 申請者辞書の初期化・ハンドラー登録
+  function wireApplicant() {
     renderApplicantHistory();
     wireApplicantHistorySave();
 
@@ -744,8 +746,10 @@
       $('ap-share-mail').disabled = state.applicant.共有メール自分を使う;
       persist(); refresh();
     });
+  }
 
-    // 団体情報プリセットのハンドラー登録
+  function wirePresets() {
+    // 団体情報プリセット
     $('org-preset-sel').addEventListener('change', function () {
       var p = state.orgPresets.find(function (x) { return x.id === $('org-preset-sel').value; });
       if (!p) return;
@@ -798,7 +802,9 @@
       state.presets = state.presets.filter(function (p) { return p.id !== id; });
       persist(); renderPresets();
     });
+  }
 
+  function wireOutput() {
     $('shorten-url').checked = !!state.shortenUrl;
     $('shorten-url').addEventListener('change', function () {
       state.shortenUrl = $('shorten-url').checked;
@@ -828,8 +834,10 @@
         function () { alert('コピーできませんでした。テキストを手で選択してコピーしてください。'); }
       );
     });
+  }
 
-    // データ入出力 - チェックボックスとテンプレートボタンの生成
+  function wireDataIO() {
+    // チェックボックスとテンプレートボタンの生成
     var expBox = $('export-checks');
     root.Store.EXPORT_FIELDS.forEach(function (f) {
       var lab = document.createElement('label');
@@ -891,7 +899,9 @@
       resyncFromState();
       setMsg($('io-msg'), '削除しました。', true);
     });
+  }
 
+  function wireProbe() {
     $('probe-link').href = 'javascript:' + encodeURIComponent('__PROBE_SOURCE__');
     $('probe-apply').addEventListener('click', function () {
       try {
@@ -906,6 +916,16 @@
         setMsg($('probe-msg'), '取り込めませんでした：' + (e && e.message || e), false);
       }
     });
+  }
+
+  function wire() {
+    $('version').textContent = 'バージョン ' + BUILD.version + '（ビルド ' + BUILD.builtAt + '）';
+    wireMembers();
+    wireApplicant();
+    wirePresets();
+    wireOutput();
+    wireDataIO();
+    wireProbe();
   }
 
   // 選択肢を先に流し込んでから値を割り当てる（順序を逆にすると select の値が入らない）

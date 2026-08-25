@@ -72,7 +72,7 @@ function renderQuestion(q, i, labelMode, valueMismatch) {
       }).join('');
       break;
     case 'date':
-      // ★ 実物どおり role="combobox" を付ける。ここが今回のバグの再現点
+      // 実物どおり role="combobox" を付ける。ここが今回のバグの再現点
       body = `<input type="text" role="combobox" class="ms-TextField-field field-300"`
         + ` id="${esc(q.datePickerId || 'DatePicker' + i + '-label')}"`
         + ` placeholder="${esc(q.placeholder || '')}" aria-label="${esc(q.ariaLabel || '日付の選択')}"`
@@ -256,7 +256,7 @@ export function buildMockForm(opts = {}) {
       document.querySelectorAll('[aria-expanded="true"]').forEach(function (c) { c.setAttribute('aria-expanded','false'); });
     }, true);
 
-    /* ★ 本番で観測した挙動の再現。
+    /* 本番で観測した挙動の再現。
      * 開いたままフォーカスが外れると、活性項目（実際に選ばれてしまったのは末尾の
      * 「その他 Other」だった）が確定してしまう。ここを再現しておかないと、
      * 「開きっぱなしにしない」という修正が効いているかをテストで確かめられない。 */

@@ -117,10 +117,10 @@ console.log('\n事前入力 URL の組み立て');
   check('空白が %20 で送られる（+ ではない）', /%20/.test(r.url) && !/\+/.test(r.url));
   check('route=shorturl が落ちている', !/route=shorturl/.test(r.url));
 
-  // ★ v1.1.0 の失敗。2通りの綴りを送るとパラメータ数が倍になり打ち切りを早める
+  // v1.1.0 の失敗。2通りの綴りを送るとパラメータ数が倍になり打ち切りを早める
   check('綴りが1通りだけ（rr… が混ざらない）', !/[?&]rr[0-9a-f]{32}=/.test(r.url));
 
-  // ★ v1.1.1 A案の失敗。飛び飛びに送ると Forms が途中で打ち切る
+  // v1.1.1 A案の失敗。飛び飛びに送ると Forms が途中で打ち切る
   const names = [...r.url.matchAll(/[?&](r[0-9a-f]{32})=/g)].map((m) => m[1]);
   const orders = names.map((n) => MAP.questions.find((q) => q.qid === n).order);
   const contiguous = orders.every((o, i) => o === i);
@@ -150,7 +150,7 @@ console.log('\n事前入力 URL の組み立て');
     r.included.length === prefillable && r.length <= Prefill.MAX_URL,
     `${r.included.length} / ${prefillable} 問 / ${r.length} 文字`);
 
-  /* ★ 短縮するときに何を残すか。
+  /* 短縮するときに何を残すか。
    * 分岐を開く設問（5番・8番）が外れると後続が画面に出てこなくなるので、
    * これだけは絶対に外してはいけない。外すのは長い自由記述から。 */
   const tight = Prefill.build(FORM, MAP.questions, resolve, { prefix: MAP.prefillPrefix, maxUrl: 1000 });
@@ -169,7 +169,7 @@ console.log('\n事前入力 URL の組み立て');
     return !q || q.type === 'text' || q.type === 'textarea' || q.type === 'file';
   }), tight.skipped.map((s) => s.label).join('、'));
 
-  /* ★ 種別ごとの書式。ここを間違えて全部を裸のテキストで送っていたため、
+  /* 種別ごとの書式。ここを間違えて全部を裸のテキストで送っていたため、
    * 選択肢と日付が入らず、5番（分岐点）が未回答のままになって
    * 6番以降がまるごと画面に出てこなかった。 */
   const dec = (u) => [...new URL(u).searchParams].filter(([k]) => k !== 'id');
@@ -222,7 +222,7 @@ console.log('\n未検証の機能を主導線にしていないか');
   // 検証済みのブックマークレット（③）が、未確定の事前入力（②）より後に「本命」として置かれているか
   const prefillAt = indexSrc.indexOf('id="prefill-link"');
   const bmAt = indexSrc.indexOf('id="bm-link"');
-  /* ★ AADSTS90015 の再発防止。
+  /* AADSTS90015 の再発防止。
    * エラーが出たとき内訳を測ったら、URL 7,089文字のうち 5,652文字（80%）が
    * ハッシュ（#gsh=）で、事前入力クエリは1,292文字だった。
    * 膨らませていたのはハッシュのほう。だからリンクにハッシュは載せない。 */

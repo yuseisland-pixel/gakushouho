@@ -113,7 +113,7 @@
     if (q.querySelector('input[type="file"]')) return 'file';
     if (q.querySelector('[role="radio"],input[type="radio"]')) return 'radio';
     if (q.querySelector('[role="checkbox"],input[type="checkbox"]')) return 'checkbox';
-    if (dateField(q)) return 'date';            // ★ dropdown より先に判定する
+    if (dateField(q)) return 'date';            // dropdown より先に判定する
     if (dropdownTrigger(q)) return 'dropdown';
     if (q.querySelector('textarea')) return 'textarea';
     if (q.querySelector('input')) return 'text';
@@ -385,10 +385,10 @@
     // ここが要。読み取っただけのつもりで回答を変えていないかを必ず検証する。
     report.回答を変えていない = report.閉じた後の表示 === textBefore;
     if (!report.回答を変えていない) {
-      report.警告 = '⚠ この設問の回答が「' + textBefore + '」から「' + report.閉じた後の表示
+      report.警告 = '注意: この設問の回答が「' + textBefore + '」から「' + report.閉じた後の表示
         + '」に変わってしまいました。フォームを再読み込みして元に戻してください。';
     } else if (!report.closedAfter) {
-      report.警告 = '⚠ ドロップダウンを閉じられませんでした。フォームを再読み込みしてください。';
+      report.警告 = '注意: ドロップダウンを閉じられませんでした。フォームを再読み込みしてください。';
     }
 
     return report;
