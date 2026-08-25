@@ -7,6 +7,7 @@
   'use strict';
 
   var KEY = 'gakushoho.v1';
+  // 注意: SCHEMA を上げると load() が既存データを破棄して初期状態に戻す（移行処理は未実装）
   var SCHEMA = 1;
 
   function blank() {

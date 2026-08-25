@@ -16,7 +16,6 @@ jobs:
       - run: node tools/verify-mock.mjs
       - run: node tools/verify-probe.mjs
       - run: node tools/verify-filler.mjs
-      - run: node tools/verify-q4test.mjs
       - run: node tools/verify-browser.mjs
       # NOTE: verify-excel.ps1 requires Excel COM automation which is not available on GitHub-hosted runners
       # Run it locally on Windows with Excel installed

@@ -11,9 +11,7 @@
   const DB_NAME = 'gakushouho-save-target';
   const STORE_NAME = 'folder-handle';
 
-  /* ─────────────────────────────────────────────────────────────── */
-  /* IndexedDB: フォルダハンドルの永続化 */
-  /* ─────────────────────────────────────────────────────────────── */
+  // ---- IndexedDB: フォルダハンドルの永続化 ----
 
   function getDB() {
     return new Promise(function (resolve, reject) {
@@ -53,9 +51,7 @@
     });
   }
 
-  /* ─────────────────────────────────────────────────────────────── */
-  /* Public API */
-  /* ─────────────────────────────────────────────────────────────── */
+  // ---- Public API ----
 
   function isSupported() {
     return typeof window.showDirectoryPicker === 'function';

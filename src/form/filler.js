@@ -3,18 +3,12 @@
  * 実行時に window.__GSH_PAYLOAD__ = { map: {...}, values: {...} } が入っている前提。
  * bookmarklet-gen.js がこの payload を頭に付けた形で組み立てる。
  *
- * ■ 設計の背景
- *   旧版は設問を「並び順」で指定していた。大学が設問を1つ追加した結果それ以降が
- *   ひとつずつズレ、責任者名が空・別の欄に誤入力・国内/海外が未選択という状態で
- *   申請が出ていた。しかも誰も気付かなかった。
+ * 設計原則（並び順指定は設問の増減でズレるため使わない）:
+ *   - 設問は「設問ID」で特定する（設問を作り直さない限り不変）
+ *   - 特定できなければ黙って進まず、必ず警告する
+ *   - 入力後は必ず読み戻して、意図した値が入ったか確認する
  *
- *   そこで、
- *     - 設問は「設問ID」で特定する（設問を作り直さない限り不変）
- *     - 特定できなければ黙って進まず、必ず警告する
- *     - 入力したら必ず読み戻して、意図した値が入ったか確認する
- *   の3つを軸にしている。件数だけ報告しても意味がない。何がどう入ったかを見せる。
- *
- * ■ CSP（実測）
+ * CSP（実測）
  *   forms.cloud.microsoft は require-trusted-types-for 'script' を返すため
  *   innerHTML への代入は TypeError で落ちる。UI は DOM API だけで組む。
  */
@@ -378,17 +372,19 @@
    * 8番に回答すると以降が現れる。
    * だから分岐を開く設問に回答したあとは、**設問が実際に増えるまで待つ**必要がある。
    * 固定の待ち時間だと、描画が遅れたときに以降が全部埋まらない（実際にそうなった）。 */
-  async function waitForMore(before, limitMs) {
-    /* 「増えたら成功」だけだと、既に全問見えている状態（前回の続きから開いた、
-     * 2回目の実行、など）で永久に増えず、正常なのに失敗と判定してしまう。
-     * 想定数に達しているなら、それ以上増えなくても満たされているとみなす。 */
+  var WAIT_LIMIT_MS = 3000;
+  async function waitForMore(before) {
+    /* 「増えたら成功」だけだと、既に全問見えている状態（2回目の実行など）で
+     * 永久に増えず、正常なのに失敗と判定してしまう。
+     * 実行前から想定数に達していた場合に限り、増えなくても満たされたとみなす。
+     * 実行前が想定数未満なら「増えたか」だけを見る（分岐未展開の検出を守るため）。 */
+    var alreadyFull = COUNT_MIN != null && before >= COUNT_MIN;
     function satisfied() {
-      var n = questionNodes().length;
-      return n > before || (COUNT_MIN != null && n >= COUNT_MIN);
+      return questionNodes().length > before || alreadyFull;
     }
     var waited = 0;
     var step = 100;
-    while (waited < (limitMs || 3000)) {
+    while (waited < WAIT_LIMIT_MS) {
       if (satisfied()) return true;
       await sleep(step);
       waited += step;
@@ -535,6 +531,7 @@
     // 範囲を外れたときだけ警告する。範囲内の増減は条件付き設問による正常な変動
     var countMismatch = countOutOfRange(finalCount) && gateFailures.length === 0;
     banner(countMismatch, finalCount);
+    // サポート用ログ。問い合わせ時に開発者ツールで結果一覧を確認できるよう意図的に残す
     console.log('[学傷補・学賠補 自動入力]', results);
   }
 
@@ -565,7 +562,7 @@
     box.id = 'gsh-filler-banner';
 
     box.appendChild(el('div', 'font-weight:700;font-size:14px;margin-bottom:6px',
-      bad ? '⚠ 自動入力しましたが、確認が必要です' : '✅ 自動入力しました'));
+      bad ? '自動入力しましたが、確認が必要です' : '自動入力しました'));
     // どの経路で値を受け取ったかを出す。ハッシュが消えていた場合に気付けるように
     if (payloadSource) {
       box.appendChild(el('div', 'font-size:12px;color:#555;margin-bottom:4px',
@@ -577,7 +574,7 @@
     if (staleFound) {
       box.appendChild(el('div', 'color:#b00;font-weight:700;margin-bottom:6px',
         'フォームに前から入っていた内容を、上書きできなかった項目があります。'
-        + '下の一覧で ✖ の付いた設問を、手で直してください。'));
+        + '下の一覧で [失敗] の付いた設問を、手で直してください。'));
     }
 
     if (gateFailures.length) {
@@ -593,7 +590,7 @@
     var table = el('table', 'width:100%;border-collapse:collapse;margin-top:4px');
     results.forEach(function (r) {
       var tr = el('tr');
-      var mark = { ok: '✅', 'ok-fallback': '⚠', skip: '—', warn: '⚠', error: '✖' }[r.status] || '?';
+      var mark = { ok: '[OK]', 'ok-fallback': '[注意]', skip: '[スキップ]', warn: '[注意]', error: '[失敗]' }[r.status] || '?';
       var color = (r.status === 'error') ? '#b00' : (r.status === 'warn' || r.status === 'ok-fallback') ? '#a05000' : '#333';
       tr.appendChild(el('td', 'vertical-align:top;padding:2px 6px 2px 0', mark));
       tr.appendChild(el('td', 'vertical-align:top;padding:2px 6px 2px 0;white-space:nowrap;font-weight:600', r.label));

@@ -375,7 +375,7 @@ if (rb && !rb.error) {
   check(`設問数を報告する（${expected.length} 問）`,
     new RegExp('設問数: ' + expected.length).test(rb.text),
     (/設問数: \d+/.exec(rb.text) || [])[0]);
-  // ★ 読むだけ。プローブがドロップダウンを開いて回答を変えた事故の再発防止
+  // 読むだけ。プローブがドロップダウンを開いて回答を変えた事故の再発防止
   const same = JSON.stringify(rb.before) === JSON.stringify(rb.after);
   check('回答状態を1つも変えていない', same,
     same ? '17問を照合' : '変化してしまっています');

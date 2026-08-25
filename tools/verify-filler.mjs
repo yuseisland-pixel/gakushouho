@@ -187,7 +187,7 @@ check('責任者名（旧版で空だった欄）', byLabel(S, '責任者名').v
 check('活動開始日（yyyy/MM/dd）', byLabel(S, '活動開始日').value === '2026/09/01', byLabel(S, '活動開始日').value);
 check('活動終了日（yyyy/MM/dd）', byLabel(S, '活動終了日').value === '2026/09/03', byLabel(S, '活動終了日').value);
 check('参加学生数（メンバー数から自動）', byLabel(S, '参加学生数').value === '7', byLabel(S, '参加学生数').value);
-check('活動場所（国内/海外）（旧版で未選択だった欄）', byLabel(S, '活動場所（国内/海外）').value === VALUES.draft.国内外, byLabel(S, '活動場所（国内/海外）').value);
+check('活動場所（国内/海外）（旧版で未選択だった欄）', byLabel(S, '活動場所（国内/海外）').checked === VALUES.draft.国内外, byLabel(S, '活動場所（国内/海外）').checked);
 check('活動場所（国内/海外の欄と紛らわしい）', byLabel(S, '活動場所').value === VALUES.draft.活動場所, byLabel(S, '活動場所').value);
 check('備考（既定は空のまま）', !byLabel(S, '備考').value, byLabel(S, '備考').value || '(空)');
 
@@ -250,8 +250,8 @@ if (rIns && !rIns.error) {
   check('【その他の場合のみ】箇所名が空のまま（旧版はここに責任者名を書いた）',
     !shifted('【その他の場合のみ】箇所名').value, shifted('【その他の場合のみ】箇所名').value || '(空)');
   check('国内/海外が選択される（旧版は未選択だった）',
-    shifted('活動場所（国内/海外）').value === VALUES.draft.国内外,
-    shifted('活動場所（国内/海外）').value);
+    shifted('活動場所（国内/海外）').checked === VALUES.draft.国内外,
+    shifted('活動場所（国内/海外）').checked);
   check('挿入された設問には何も入れていない', !at(T, INS_AT).value, at(T, INS_AT).value || '(空)');
   check('設問数の食い違いを警告している', /設問数/.test(rIns.bannerText));
 } else {
@@ -308,7 +308,7 @@ console.log('\n[4c] 前から入っていた値を上書きできないとき');
     !!r && byLabel(r.state, '責任者名').value === 'ZZ前回の値',
     r ? byLabel(r.state, '責任者名').value : '結果を回収できず');
   const row = r && r.rows.find((x) => x.label === '責任者名');
-  check('その設問を失敗として報告している', !!row && row.mark === '✖',
+  check('その設問を失敗として報告している', !!row && row.mark === '[失敗]',
     row ? `${row.mark} ${row.detail}` : 'なし');
   check('残っていた値を名指ししている', !!row && /ZZ前回の値/.test(row.detail),
     row ? row.detail : 'なし');
@@ -351,8 +351,8 @@ check('違う値を入れたら検査が気付く',
 // ---- 7. 読み戻し報告 ---------------------------------------------------
 console.log('\n[7] 結果の報告');
 check('件数ではなく設問ごとの結果を出している', r1.rows.length >= 15, `${r1.rows.length} 行`);
-check('失敗した項目がない', !r1.rows.some((x) => x.mark === '✖'),
-  r1.rows.filter((x) => x.mark === '✖').map((x) => x.label + ':' + x.detail).join(' / ') || 'なし');
+check('失敗した項目がない', !r1.rows.some((x) => x.mark === '[失敗]'),
+  r1.rows.filter((x) => x.mark === '[失敗]').map((x) => x.label + ':' + x.detail).join(' / ') || 'なし');
 check('送信前の目視確認を促している', /送信前/.test(r1.bannerText));
 
 // ---- 7b. 段階表示（分岐）への対応 ---------------------------------------
@@ -373,10 +373,10 @@ console.log('\n[7b] 段階表示（分岐）');
     check('分岐の描画が遅れても15問すべて埋まる',
       byLabel(S2, '責任者名').value === VALUES.org.責任者名
       && byLabel(S2, '活動場所').value === VALUES.draft.活動場所
-      && byLabel(S2, '活動場所（国内/海外）').value === VALUES.draft.国内外,
+      && byLabel(S2, '活動場所（国内/海外）').checked === VALUES.draft.国内外,
       `責任者名=${byLabel(S2, '責任者名').value} / 活動場所=${byLabel(S2, '活動場所').value}`);
-    check('遅延時も失敗項目がない', !slow.rows.some((x) => x.mark === '✖'),
-      slow.rows.filter((x) => x.mark === '✖').map((x) => x.label).join('、') || 'なし');
+    check('遅延時も失敗項目がない', !slow.rows.some((x) => x.mark === '[失敗]'),
+      slow.rows.filter((x) => x.mark === '[失敗]').map((x) => x.label).join('、') || 'なし');
   } else {
     check('遅延ありの模擬で結果を回収できた', false, slow ? slow.error : 'なし');
   }
