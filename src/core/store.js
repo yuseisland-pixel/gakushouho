@@ -32,6 +32,8 @@
       },
       members: [],
       presets: [],
+      orgPresets: [],
+      history: { 氏名: [], 大学メール: [], 連絡先メール: [] },
       formMap: null,        // 調査ブックマークレットの結果を取り込んだら入る
       /* 事前入力のパラメータ名の綴り。実機でしか判定できないので、
        * 利用者が「効いたほう」を選んだ結果をここに保存する。
@@ -61,6 +63,15 @@
     });
     data.members = data.members || [];
     data.presets = data.presets || [];
+    data.orgPresets = data.orgPresets || [];
+    // history オブジェクトが欠けている場合や一部キーだけ欠けている場合に埋める
+    if (!data.history || typeof data.history !== 'object') {
+      data.history = JSON.parse(JSON.stringify(base.history));
+    } else {
+      Object.keys(base.history).forEach(function (k) {
+        if (!Array.isArray(data.history[k])) data.history[k] = [];
+      });
+    }
     // 後から足したトップレベルの項目も既定値で埋める
     Object.keys(base).forEach(function (k) {
       if (data[k] === undefined) data[k] = base[k];
@@ -96,8 +107,8 @@
   // ---- エクスポート/インポート ------------------------------------
   // 3モード。「団体配布用」だけは personal を物理的に含めない。
   var MODES = {
-    org: { label: '団体配布用(個人情報を含めない)', keys: ['org', 'members', 'presets', 'formMap'] },
-    all: { label: '端末移行用(すべて)', keys: ['personal', 'org', 'members', 'presets', 'formMap'] },
+    org: { label: '団体配布用(個人情報を含めない)', keys: ['org', 'members', 'presets', 'orgPresets', 'formMap'] },
+    all: { label: '端末移行用(すべて)', keys: ['personal', 'org', 'members', 'presets', 'orgPresets', 'history', 'formMap'] },
     members: { label: 'メンバー辞書のみ', keys: ['members'] }
   };
 
@@ -134,6 +145,14 @@
     if (incoming.presets) {
       next.presets = incoming.presets;
       report.push('活動プリセットを ' + incoming.presets.length + ' 件取り込みました');
+    }
+    if (incoming.orgPresets) {
+      next.orgPresets = incoming.orgPresets;
+      report.push('団体プリセットを ' + incoming.orgPresets.length + ' 件取り込みました');
+    }
+    if (incoming.history) {
+      next.history = incoming.history;
+      report.push('個人情報の履歴を取り込みました');
     }
     if (incoming.formMap) {
       next.formMap = incoming.formMap;

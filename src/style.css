@@ -95,6 +95,32 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .member .del { border: none; background: none; color: var(--muted); padding: 2px 6px; }
 .member .del:hover { color: var(--danger); background: none; }
 
+.subcard {
+  border: 1px solid var(--line); border-radius: 8px;
+  padding: 12px 14px; margin-bottom: 14px; background: #fbfcfd;
+}
+.subhead { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--muted); }
+
+.field-with-dict { display: flex; flex-direction: column; gap: 6px; }
+.field-dict { display: flex; flex-direction: column; gap: 6px; }
+.field-dict-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #e3f2fd; border: 1px solid #90caf9; border-radius: 16px;
+  padding: 4px 8px; font-size: 13px;
+}
+.chip-text { cursor: pointer; flex: 0 1 auto; }
+.chip-text:hover { text-decoration: underline; }
+.chip-del {
+  border: none; background: none; color: #1976d2; padding: 0; margin: 0;
+  cursor: pointer; font-size: 14px; font-weight: 600;
+}
+.chip-del:hover { color: var(--danger); }
+
+button.tiny { padding: 5px 10px; font-size: 12px; }
+
+label:has(> input[type="checkbox"]) { flex-direction: row; align-items: center; gap: 6px; }
+
 .out-block { padding: 14px 0; border-top: 1px solid var(--line); }
 .out-block:first-of-type { border-top: none; padding-top: 4px; }
 

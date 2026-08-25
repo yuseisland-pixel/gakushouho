@@ -31,11 +31,29 @@
   <h2>1. あなたの情報 <span class="badge person">各自で入力</span></h2>
   <p class="note">この欄は人によって違います。配布されたファイルを使う場合も、ここは必ず自分で入れ直してください。</p>
   <div class="grid">
-    <label>氏名<input id="p-name" placeholder="早稲田 太郎"></label>
+    <div class="field-with-dict">
+      <label>氏名<input id="p-name" placeholder="早稲田 太郎"></label>
+      <div class="field-dict">
+        <div class="field-dict-chips" id="p-name-chips"></div>
+        <button type="button" id="p-name-save" class="ghost tiny">この値を辞書に保存</button>
+      </div>
+    </div>
     <label>カナ氏名<input id="p-kana" placeholder="ワセダ　タロウ"><small>名簿に使います。全角カナ、姓名の間は全角スペース</small></label>
     <label>学籍番号<input id="p-sid" placeholder="1A123456"><small>半角英数8桁。ハイフン以降は入れません</small></label>
-    <label>大学のメールアドレス<input id="p-mail1" placeholder="xxxx@waseda.jp"></label>
-    <label>連絡先メールアドレス<input id="p-mail2" placeholder="xxxx@ruri.waseda.jp"></label>
+    <div class="field-with-dict">
+      <label>大学のメールアドレス<input id="p-mail1" placeholder="xxxx@waseda.jp"></label>
+      <div class="field-dict">
+        <div class="field-dict-chips" id="p-mail1-chips"></div>
+        <button type="button" id="p-mail1-save" class="ghost tiny">この値を辞書に保存</button>
+      </div>
+    </div>
+    <div class="field-with-dict">
+      <label>連絡先メールアドレス<input id="p-mail2" placeholder="xxxx@ruri.waseda.jp"></label>
+      <div class="field-dict">
+        <div class="field-dict-chips" id="p-mail2-chips"></div>
+        <button type="button" id="p-mail2-save" class="ghost tiny">この値を辞書に保存</button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -43,6 +61,11 @@
 <section class="card" id="sec-org">
   <h2>2. 団体の情報 <span class="badge org">団体で共通</span></h2>
   <p class="note">サークルで1人が設定して、JSON書き出しで配れば他の人は入力不要です。</p>
+  <div class="preset-row" id="org-preset-row">
+    <select id="org-preset-sel"><option value="">プリセットを選ぶ…</option></select>
+    <button id="org-preset-save" class="ghost">現在の内容をプリセット保存</button>
+    <button id="org-preset-del" class="ghost">選択中のプリセットを削除</button>
+  </div>
   <div class="grid">
     <label>団体名<input id="o-org" placeholder="生物同好会"></label>
     <label>活動名（フォーム用）<input id="o-act" placeholder="生物同好会での活動"><small>フォームの「科目名 / 行事名 / 活動名」に入ります</small></label>
@@ -62,39 +85,53 @@
 <section class="card" id="sec-members">
   <h2>3. メンバー辞書</h2>
   <p class="note">一度登録すれば、次回からはチェックを入れるだけで名簿に載ります。</p>
-  <div class="member-add">
-    <input id="m-sid" placeholder="学籍番号 1A123456" size="12">
-    <input id="m-kana" placeholder="カナ氏名 ワセダ　タロウ" size="18">
-    <input id="m-name" placeholder="表示名 早稲田太郎" size="14">
-    <button id="m-add" class="primary">追加</button>
-    <button id="m-add-self" class="ghost">自分を追加</button>
+
+  <div class="subcard">
+    <h3 class="subhead">メンバーを登録</h3>
+    <div class="member-add">
+      <label>学籍番号<input id="m-sid" placeholder="1A123456" size="12"></label>
+      <label>カナ氏名<input id="m-kana" placeholder="ワセダ　タロウ" size="18"></label>
+      <label>表示名<input id="m-name" placeholder="早稲田太郎" size="14"></label>
+      <button id="m-add" class="primary">追加</button>
+      <button id="m-add-self" class="ghost">自分を追加</button>
+    </div>
   </div>
-  <div class="member-tools">
-    <input id="m-filter" placeholder="名前・学籍番号で絞り込み" size="22">
-    <button id="m-all" class="ghost">全員選択</button>
-    <button id="m-none" class="ghost">選択解除</button>
-    <span id="m-count" class="count"></span>
+
+  <div class="subcard">
+    <h3 class="subhead">登録済みメンバー（検索・選択）</h3>
+    <div class="member-tools">
+      <input id="m-filter" placeholder="名前・学籍番号で絞り込み" size="22">
+      <button id="m-all" class="ghost">全員選択</button>
+      <button id="m-none" class="ghost">選択解除</button>
+      <span id="m-count" class="count"></span>
+    </div>
+    <div id="member-list" class="member-list"></div>
   </div>
-  <div id="member-list" class="member-list"></div>
 </section>
 
 <!-- ── 4. 活動情報 ─────────────────────────────── -->
 <section class="card" id="sec-activity">
   <h2>4. 今回の活動</h2>
   <p class="note">ここに1回入れれば、フォームと名簿の両方に反映されます。名簿の申請年月日は本日の日付が自動で入ります。</p>
-  <div class="grid">
-    <label>活動内容<textarea id="a-content" rows="2" placeholder="フィールドワーク（採集・観察）"></textarea></label>
-    <label>活動場所<input id="a-place" placeholder="○○県○○市 ○○川河川敷"></label>
-    <label>活動開始日<input id="a-start" type="date"></label>
-    <label>活動終了日<input id="a-end" type="date"></label>
-    <label>備考（任意）<textarea id="a-remarks" rows="2" placeholder="特になければ空のままで構いません"></textarea></label>
-  </div>
-  <p class="note" id="count-badge"></p>
+
   <div class="preset-row">
     <select id="preset-sel"><option value="">プリセットを選ぶ…</option></select>
     <button id="preset-save" class="ghost">今の内容をプリセット保存</button>
     <button id="preset-del" class="ghost">選択中のプリセットを削除</button>
   </div>
+
+  <div class="grid">
+    <label>活動内容<textarea id="a-content" rows="2" placeholder="フィールドワーク（採集・観察）"></textarea></label>
+    <label>活動場所<input id="a-place" placeholder="○○県○○市 ○○川河川敷"></label>
+  </div>
+
+  <div class="grid">
+    <label>活動開始日<input id="a-start" type="date"></label>
+    <label>活動終了日<input id="a-end" type="date"></label>
+    <label>備考（任意）<textarea id="a-remarks" rows="2" placeholder="特になければ空のままで構いません"></textarea></label>
+  </div>
+
+  <p class="note" id="count-badge"></p>
 </section>
 
 <!-- ── 5. 出力 ─────────────────────────────────── -->
@@ -129,7 +166,7 @@
   <div class="out-block" id="prefill-block">
     <h3>② フォームを開く（値が入った状態で）</h3>
     <p class="note">
-      下のリンクを押すと、値が入った状態でフォームが開きます。<strong>これが本命です。</strong>
+      下のリンクを押すと、値が入った状態でフォームが開きます。
     </p>
     <p>
       <a id="prefill-link" href="#" target="_blank" rel="noopener" class="bookmarklet">値を入れてフォームを開く</a>
@@ -202,10 +239,10 @@
   <details>
     <summary>フォームの設問マッピングを更新する（フォームが変わって入力がズレたとき）</summary>
     <p class="note">
-      調査用ブックマークレットをフォーム上で実行して出てきた JSON を、ここに貼り付けてください。
-      設問 ID が取れていれば、上の「事前入力リンク」も使えるようになります。
+      下のリンクをフォーム上で実行すると、調査結果の JSON が画面に表示されます（自動送信はされません）。
+      表示された内容をコピーして、ここに貼り付けて「取り込む」を押すか、開発者に送ってください。
     </p>
-    <p><a id="probe-link" href="#" class="bookmarklet">フォーム調査（開発者に送る用）</a></p>
+    <p><a id="probe-link" href="#" class="bookmarklet">フォーム調査を実行</a></p>
     <textarea id="probe-paste" rows="5" placeholder="調査結果の JSON をここに貼り付け"></textarea>
     <button id="probe-apply" class="ghost">取り込む</button>
     <span id="probe-msg" class="msg"></span>
