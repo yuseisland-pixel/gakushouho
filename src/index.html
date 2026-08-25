@@ -22,10 +22,10 @@
   <h2>1. あなたの情報 <span class="badge person">各自で入力</span></h2>
   <p class="note">この欄は人によって違います。配布されたファイルを使う場合も、ここは必ず自分で入れ直してください。</p>
   <div class="grid">
-    <label>氏名<input id="p-name" placeholder="早稲田 太郎"></label>
-    <label>カナ氏名<input id="p-kana" placeholder="ワセダ　タロウ"><small>名簿に使います。全角カナ、姓名の間は全角スペース</small></label>
+    <label>氏名<input id="p-name" placeholder="氏名"></label>
+    <label>カナ氏名<input id="p-kana" placeholder="カナ氏名"><small>名簿に使います。全角カナ、姓名の間は全角スペース</small></label>
     <label>学籍番号<input id="p-sid" placeholder="1A123456"><small>半角英数8桁。ハイフン以降は入れません</small></label>
-    <label>メールアドレス<input id="p-mail" placeholder="xxxx@waseda.jp"></label>
+    <label>メールアドレス<input id="p-mail" placeholder="メールアドレス"></label>
   </div>
 </section>
 
@@ -36,8 +36,8 @@
     フォームの「申請者」として登録される、教職員の方の情報です。よく使う組み合わせは辞書に保存しておけます。
   </p>
   <div class="grid">
-    <label>氏名<input id="ap-name" placeholder="早稲田 花子"></label>
-    <label>申請者メールアドレス<input id="ap-mail" placeholder="xxxx@waseda.jp"></label>
+    <label>氏名<input id="ap-name" placeholder="氏名"></label>
+    <label>申請者メールアドレス<input id="ap-mail" placeholder="メールアドレス"></label>
   </div>
   <div class="field-dict">
     <div class="field-dict-chips" id="ap-chips"></div>
@@ -51,7 +51,7 @@
         ※上記以外に申請内容や承認・否認の状況を共有したいメールアドレスがあれば、入力してください。<br>
         *Enter any other email address with which you would like to share the details of your application and the status of approval or rejection.
       </p>
-      <input id="ap-share-mail" placeholder="xxxx@waseda.jp">
+      <input id="ap-share-mail" placeholder="メールアドレス">
     </div>
   </div>
 </section>
@@ -66,8 +66,8 @@
     <button id="org-preset-del" class="ghost">選択中のプリセットを削除</button>
   </div>
   <div class="grid">
-    <label>団体名<input id="o-org" placeholder="生物同好会"></label>
-    <label>活動名（フォーム用）<input id="o-act" placeholder="生物同好会での活動"><small>フォームの「科目名 / 行事名 / 活動名」に入ります</small></label>
+    <label>団体名<input id="o-org"></label>
+    <label>活動名（フォーム用）<input id="o-act"><small>フォームの「科目名 / 行事名 / 活動名」に入ります</small></label>
     <label>責任者名<input id="o-resp" placeholder="顧問または代表者の氏名"></label>
     <label>加入を希望する補償制度<select id="o-ins"></select></label>
     <label>活動の種類<select id="o-kind"></select></label>
@@ -87,8 +87,8 @@
     <h3 class="subhead">メンバーを登録</h3>
     <div class="member-add">
       <label>学籍番号<input id="m-sid" placeholder="1A123456" size="12"></label>
-      <label>カナ氏名<input id="m-kana" placeholder="ワセダ　タロウ" size="18"></label>
-      <label>表示名<input id="m-name" placeholder="早稲田太郎" size="14"></label>
+      <label>カナ氏名<input id="m-kana" placeholder="カナ氏名" size="18"></label>
+      <label>表示名<input id="m-name" placeholder="表示名" size="14"></label>
       <button id="m-add" class="primary">追加</button>
     </div>
   </div>
@@ -117,9 +117,9 @@
   </div>
 
   <div class="grid">
-    <label>活動内容<textarea id="a-content" rows="2" placeholder="フィールドワーク（採集・観察）"></textarea></label>
+    <label>活動内容<textarea id="a-content" rows="2"></textarea></label>
     <label>活動場所（国内/海外）<select id="a-area"></select></label>
-    <label>活動場所<input id="a-place" placeholder="○○県○○市 ○○川河川敷"><small>※具体的な活動場所を入力してください。学生によって異なる場合は参加者名簿に入力してください。</small></label>
+    <label>活動場所<input id="a-place"><small>※具体的な活動場所を入力してください。学生によって異なる場合は参加者名簿に入力してください。</small></label>
   </div>
 
   <div class="grid">
