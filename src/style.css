@@ -155,6 +155,8 @@ table.review td.muted { color: var(--muted); }
 table.review td.warn-cell { color: var(--danger); }
 
 .share-mail-block { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.share-mail-field { display: flex; flex-direction: column; gap: 6px; }
+.share-mail-field .note { margin: 0; }
 
 .member.self { background: #eef6ff; }
 .self-tag {

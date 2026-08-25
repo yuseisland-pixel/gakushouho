@@ -257,7 +257,7 @@
       "matchKey": "活動場所(国内/海外)Locationofactivity(domestic/overseas)",
       "exactOnly": true,
       "type": "radio",
-      "source": "org.既定の国内外",
+      "source": "draft.国内外",
       "choices": [
         "1.国内 Domestic",
         "2.海外 Overseas"

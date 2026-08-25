@@ -45,28 +45,23 @@
     フォームの「申請者」として登録される、教職員の方の情報です。よく使う組み合わせは辞書に保存しておけます。
   </p>
   <div class="grid">
-    <div class="field-with-dict">
-      <label>氏名<input id="ap-name" placeholder="早稲田 花子"></label>
-      <div class="field-dict">
-        <div class="field-dict-chips" id="ap-name-chips"></div>
-        <button type="button" id="ap-name-save" class="ghost tiny">この値を辞書に保存</button>
-      </div>
-    </div>
-    <div class="field-with-dict">
-      <label>申請者メールアドレス<input id="ap-mail" placeholder="xxxx@waseda.jp"></label>
-      <div class="field-dict">
-        <div class="field-dict-chips" id="ap-mail-chips"></div>
-        <button type="button" id="ap-mail-save" class="ghost tiny">この値を辞書に保存</button>
-      </div>
-    </div>
+    <label>氏名<input id="ap-name" placeholder="早稲田 花子"></label>
+    <label>申請者メールアドレス<input id="ap-mail" placeholder="xxxx@waseda.jp"></label>
+  </div>
+  <div class="field-dict">
+    <div class="field-dict-chips" id="ap-chips"></div>
+    <button type="button" id="ap-save" class="ghost tiny">この組み合わせを辞書に保存</button>
   </div>
   <div class="share-mail-block">
     <label><input type="checkbox" id="ap-share-use-own"> 共有用メールアドレスに「1. あなたの情報」のメールアドレスを使う</label>
-    <label>共有用メールアドレス<input id="ap-share-mail" placeholder="xxxx@waseda.jp"></label>
-    <p class="note">
-      ※上記以外に申請内容や承認・否認の状況を共有したいメールアドレスがあれば、入力してください。<br>
-      *Enter any other email address with which you would like to share the details of your application and the status of approval or rejection.
-    </p>
+    <div class="share-mail-field">
+      <label for="ap-share-mail">共有用メールアドレス</label>
+      <p class="note">
+        ※上記以外に申請内容や承認・否認の状況を共有したいメールアドレスがあれば、入力してください。<br>
+        *Enter any other email address with which you would like to share the details of your application and the status of approval or rejection.
+      </p>
+      <input id="ap-share-mail" placeholder="xxxx@waseda.jp">
+    </div>
   </div>
 </section>
 
@@ -88,8 +83,6 @@
     <label id="o-allreg-wrap" class="hidden">参加者は全員科目登録者ですか<select id="o-allreg"></select><small>「1.授業」を選んだときだけフォームに出る設問です</small></label>
     <label>活動主管箇所名<select id="o-window"></select></label>
     <label id="o-window-other-wrap" class="hidden">箇所名（その他を選んだ場合）<input id="o-window-other" placeholder="箇所名"></label>
-    <label>既定の活動場所<input id="o-place" placeholder="早稲田キャンパス"></label>
-    <label>既定の活動場所（国内/海外）<select id="o-area"></select></label>
   </div>
   <p class="note">選択式の項目は、フォームの選択肢をそのまま並べています（英語まで含めて一致していないとフォーム側で弾かれるため）。</p>
 </section>
@@ -134,7 +127,8 @@
 
   <div class="grid">
     <label>活動内容<textarea id="a-content" rows="2" placeholder="フィールドワーク（採集・観察）"></textarea></label>
-    <label>活動場所<input id="a-place" placeholder="○○県○○市 ○○川河川敷"></label>
+    <label>活動場所（国内/海外）<select id="a-area"></select></label>
+    <label>活動場所<input id="a-place" placeholder="○○県○○市 ○○川河川敷"><small>※具体的な活動場所を入力してください。学生によって異なる場合は参加者名簿に入力してください。</small></label>
   </div>
 
   <div class="grid">
