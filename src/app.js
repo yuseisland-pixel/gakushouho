@@ -6,15 +6,60 @@
   var state = root.Store.load();
 
   // ビルド時に差し込まれる値
-  var BUILD = { version: '__VERSION__', builtAt: '__BUILT_AT__', templateStamp: '__TEMPLATE_STAMP__' };
+  var BUILD = { version: '__VERSION__', builtAt: '__BUILT_AT__' };
   var FORM_MAP = __FORM_MAP__;
-  var TEMPLATE_B64 = '__TEMPLATE_B64__';
 
-  function templateBytes() {
-    var bin = atob(TEMPLATE_B64);
-    var out = new Uint8Array(bin.length);
-    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-    return out;
+  var CLOUDINARY_CONFIG = { cloudName: 'xx1zwaop', publicId: '学傷補_学賠補_活動届用_参加者名簿' };
+  var TEMPLATE_CACHE_KEY = '__gsh_template_b64__';
+
+  async function templateBytes() {
+    var cached = localStorage.getItem(TEMPLATE_CACHE_KEY);
+    if (cached) {
+      var bin = atob(cached);
+      var out = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
+    }
+
+    try {
+      var url = 'https://res.cloudinary.com/' + CLOUDINARY_CONFIG.cloudName + '/raw/upload/' + CLOUDINARY_CONFIG.publicId + '.xlsx';
+      var res = await fetch(url, { mode: 'cors' });
+      if (res.ok) {
+        var blob = await res.blob();
+        var arrayBuf = await blob.arrayBuffer();
+        var bytes = new Uint8Array(arrayBuf);
+        var b64 = btoa(String.fromCharCode.apply(null, bytes));
+        localStorage.setItem(TEMPLATE_CACHE_KEY, b64);
+        return bytes;
+      }
+    } catch (e) {
+      setMsg($('roster-msg'), 'テンプレートの取得に失敗しました。ファイルを選択してください。', false);
+    }
+
+    return new Promise(function (resolve, reject) {
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.xlsx';
+      input.onchange = function (evt) {
+        var file = evt.target.files[0];
+        if (file) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            var buf = e.target.result;
+            var bytes = new Uint8Array(buf);
+            var bin = String.fromCharCode.apply(null, bytes);
+            var b64 = btoa(bin);
+            localStorage.setItem(TEMPLATE_CACHE_KEY, b64);
+            resolve(bytes);
+          };
+          reader.onerror = function () { reject(reader.error); };
+          reader.readAsArrayBuffer(file);
+        } else {
+          reject(new Error('ファイルが選択されませんでした'));
+        }
+      };
+      input.click();
+    });
   }
 
   function activeMap() {
@@ -391,7 +436,8 @@
     setMsg($('roster-msg'), '作成中…', true);
     try {
       var v = fillerValues();
-      var bytes = await root.Roster.generate(templateBytes(), {
+      var templateData = await templateBytes();
+      var bytes = await root.Roster.generate(templateData, {
         申請者氏名: v.applicant.氏名,
         活動名: v.org.活動名 || v.draft.活動内容,
         責任者名: v.org.責任者名,
@@ -665,7 +711,7 @@
 
   // ---- 起動 ----------------------------------------------------------
   function wire() {
-    $('version').textContent = 'バージョン ' + BUILD.version + '（ビルド ' + BUILD.builtAt + ' / 名簿テンプレ ' + BUILD.templateStamp + '）';
+    $('version').textContent = 'バージョン ' + BUILD.version + '（ビルド ' + BUILD.builtAt + '）';
 
     $('m-add').addEventListener('click', function () {
       if (addMember($('m-sid').value, $('m-kana').value, $('m-name').value)) {

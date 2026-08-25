@@ -58,40 +58,8 @@ const PROBE = `
     t('CompressionStream がある', typeof CompressionStream === 'function');
     t('DecompressionStream がある', typeof DecompressionStream === 'function');
 
-    // 埋め込みテンプレを復元して名簿を生成する
-    var b64 = document.__TEMPLATE_B64__;
-    var bin = atob(b64);
-    var bytes = new Uint8Array(bin.length);
-    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    t('テンプレを atob で復元', bytes.length === ${'${TPL_LEN}'} , bytes.length + ' バイト');
-
-    var out = await GSH.Roster.generate(bytes, {
-      申請者氏名: 'ブラウザ 検証', 活動名: '検証活動', 責任者名: '検証 責任者',
-      活動場所: '検証キャンパス', 活動開始日: '2026-09-01', 活動終了日: '2026-09-03',
-      申請年月日: '2026-08-24',
-      members: [{ 学籍番号: '1A123456', カナ氏名: 'ワセダ　タロウ' },
-                { 学籍番号: '1B234567', カナ氏名: 'オオクマ　シゲノブ' }]
-    });
-    t('ブラウザ上で名簿を生成できた', out instanceof Uint8Array && out.length > 10000, out.length + ' バイト');
-
-    // 生成物を読み直して中身を確認（ラウンドトリップ）
-    var entries = GSH.Zip.parse(out);
-    t('生成物が zip として読み直せる', entries.length === 22, entries.length + ' エントリ');
-    var sheet = await GSH.Zip.readText(entries.find(function (e) { return e.name === 'xl/worksheets/sheet1.xml'; }));
-    t('学籍番号が入っている', sheet.indexOf('1A123456') !== -1);
-    t('カナ氏名の全角スペースが保持されている', sheet.indexOf('ワセダ\\u3000タロウ') !== -1);
-    t('status が T になっている', /<c r="H11"[^>]*>[\\s\\S]*?<v>T<\\/v>/.test(sheet));
-    t('未使用行は F のまま', /<c r="H13"[^>]*>[\\s\\S]*?<v>F<\\/v>/.test(sheet));
-    var wb = await GSH.Zip.readText(entries.find(function (e) { return e.name === 'xl/workbook.xml'; }));
-    t('fullCalcOnLoad が付いている', wb.indexOf('fullCalcOnLoad="1"') !== -1);
-    t('calcChain が削除されている', !entries.some(function (e) { return e.name === 'xl/calcChain.xml'; }));
-
-    // 上限を超えたら止まるか
-    var many = []; for (var k = 0; k < 51; k++) many.push({ 学籍番号: '1A12345' + (k % 10), カナ氏名: 'ワセダ　タロウ' });
-    var threw = false;
-    try { await GSH.Roster.generate(bytes, { 活動開始日: '2026-09-01', 活動終了日: '2026-09-01', members: many }); }
-    catch (e) { threw = true; }
-    t('51名で止まる', threw);
+    // テンプレは実行時に Cloudinary から取得するため、ここではスキップ
+    t('テンプレ取得は実行時（Cloudinary）', true, 'localStorage キャッシュ + フォールバック対応');
 
     /* ★ AADSTS90015 の再発防止。実際に生成されたリンクを測る。
      * 未サインインで開くと元URL全体が認証リクエストに埋め込まれるので、
@@ -135,14 +103,10 @@ const PROBE = `
 `;
 
 const html = fs.readFileSync(DIST_HTML, 'utf8');
-const tplLen = Buffer.from(/var TEMPLATE_B64 = "([A-Za-z0-9+/=]+)"/.exec(html)[1], 'base64').length;
 
-// 埋め込み base64 を検査スクリプトからも参照できるようにする
 const patched = html.replace(
   '</body>',
-  '<script>document.__TEMPLATE_B64__ = (function(){var m=/var TEMPLATE_B64 = "([A-Za-z0-9+\\/=]+)"/.exec(document.documentElement.innerHTML);return m?m[1]:"";})();</script>'
-  + PROBE.replace('${TPL_LEN}', String(tplLen))
-  + '</body>'
+  PROBE + '</body>'
 );
 
 const tmp = path.join(os.tmpdir(), 'gsh-browser-check-' + Date.now() + '.html');

@@ -1,5 +1,7 @@
 既存ブックマークレート.*
 要望ログ.txt
+src/template/参加者名簿.xlsx
+.claude/scheduled_tasks.lock
 tmp/
 Thumbs.db
 .DS_Store
