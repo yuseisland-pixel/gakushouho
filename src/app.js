@@ -107,7 +107,17 @@
   function syncSelfMember() {
     var sid = state.personal.学籍番号 || '';
     if (sid) {
+      var toRemove = state.members.filter(function (m) { return m.id !== 'self' && m.学籍番号 === sid; });
       state.members = state.members.filter(function (m) { return m.id === 'self' || m.学籍番号 !== sid; });
+      toRemove.forEach(function (m) {
+        var idx = (state.draft.参加者 || []).indexOf(m.id);
+        if (idx !== -1) {
+          state.draft.参加者.splice(idx, 1);
+          if (state.draft.参加者.indexOf('self') === -1) {
+            state.draft.参加者.unshift('self');  // If it was selected, select 'self' instead
+          }
+        }
+      });
     }
     var self = state.members.filter(function (m) { return m.id === 'self'; })[0];
     if (!self) {
@@ -291,6 +301,7 @@
       o.value = p.id; o.textContent = p.name;
       sel.appendChild(o);
     });
+    if (keep && !state.presets.find(function (p) { return p.id === keep; })) keep = '';
     sel.value = keep;
   }
 
@@ -306,6 +317,7 @@
       o.value = p.id; o.textContent = p.name;
       sel.appendChild(o);
     });
+    if (keep && !state.orgPresets.find(function (p) { return p.id === keep; })) keep = '';
     sel.value = keep;
   }
 
