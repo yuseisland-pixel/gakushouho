@@ -322,6 +322,12 @@
   function collectIssues() {
     var out = [];
     if (!root.Store.isPersonalReady(state)) out.push('「1. あなたの情報」の氏名と、「2. 申請者の情報」の氏名・メールアドレスを入れてください。');
+    if (!state.org.加入区分) out.push('「3. 団体情報」の「加入を希望する補償制度」を選んでください。');
+    if (!state.org.活動区分) out.push('「3. 団体情報」の「活動の種類」を選んでください。');
+    if (!state.org.申請先) out.push('「3. 団体情報」の「申請先」を選んでください。');
+    if (String(state.org.活動区分 || '').indexOf('1.授業') === 0 && !state.org.全員科目登録者) {
+      out.push('「3. 団体情報」の「全員科目登録者か」を選んでください。');
+    }
     var members = selectedMembers();
     if (!members.length) out.push('参加者が選ばれていません。「4. メンバー辞書」でチェックを入れてください。');
     if (members.length > root.Roster.MAX_MEMBERS) {
