@@ -1,0 +1,19 @@
+{
+  "name": "gakushouho",
+  "version": "1.5.0",
+  "private": true,
+  "description": "学傷補・学賠補 活動届入力支援ツール（単一HTML配布・依存パッケージなし）",
+  "type": "module",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "verify:lint": "node tools/verify-lint.mjs",
+    "verify:roster": "node tools/verify-roster.mjs",
+    "verify:bundle": "node tools/verify-bundle.mjs",
+    "verify:choices": "node tools/verify-choices.mjs",
+    "verify:mock": "node tools/verify-mock.mjs",
+    "verify:probe": "node tools/verify-probe.mjs",
+    "verify:filler": "node tools/verify-filler.mjs",
+    "verify:q4test": "node tools/verify-q4test.mjs",
+    "verify:browser": "node tools/verify-browser.mjs"
+  }
+}

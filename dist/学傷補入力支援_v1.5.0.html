@@ -1,0 +1,1974 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>学傷補・学賠補 活動届 入力支援</title>
+<style>
+:root {
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --ink: #1a1d21;
+  --muted: #5c6470;
+  --line: #d8dde3;
+  --accent: #1565c0;
+  --accent-ink: #ffffff;
+  --warn-bg: #fff6e5;
+  --warn-line: #e0a100;
+  --danger: #b3261e;
+  --ok: #2e7d32;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+  max-width: 940px;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.7 "Segoe UI", "Yu Gothic UI", system-ui, sans-serif;
+}
+
+header h1 { margin: 0 0 6px; font-size: 24px; }
+.lead { margin: 0 0 4px; color: var(--muted); }
+.ver { margin: 0; color: var(--muted); font-size: 12px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin: 18px 0;
+}
+.card h2 { margin: 0 0 4px; font-size: 17px; }
+.card h3 { margin: 0 0 4px; font-size: 15px; }
+.card.warn { background: var(--warn-bg); border-color: var(--warn-line); }
+
+.note { margin: 4px 0 14px; color: var(--muted); font-size: 13px; }
+.msg { font-size: 13px; margin-left: 8px; }
+.msg.ok { color: var(--ok); }
+.msg.ng { color: var(--danger); }
+.count { color: var(--muted); font-size: 12px; }
+
+.badge {
+  font-size: 11px; font-weight: 700; padding: 2px 8px;
+  border-radius: 999px; vertical-align: middle; margin-left: 6px;
+}
+.badge.person { background: #e3f2fd; color: #0d47a1; }
+.badge.org { background: #e8f5e9; color: #1b5e20; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 16px; }
+label { display: flex; flex-direction: column; font-size: 13px; font-weight: 600; gap: 4px; }
+label small { font-weight: 400; color: var(--muted); font-size: 11px; }
+input, textarea, select {
+  font: inherit; padding: 7px 9px;
+  border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink);
+}
+input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+textarea { resize: vertical; }
+
+button {
+  font: inherit; padding: 7px 14px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--line); background: #fff; color: var(--ink);
+}
+button:hover { background: #eef1f5; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+button.primary:hover { filter: brightness(1.08); }
+button.big { padding: 11px 22px; font-size: 16px; }
+button.danger { border-color: var(--danger); color: var(--danger); }
+button.danger:hover { background: #fdecea; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+
+.member-add, .member-tools, .preset-row, .io-row {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px;
+}
+
+.member-list {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px;
+  max-height: 320px; overflow-y: auto;
+  border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: #fbfcfd;
+}
+.member-list:empty::after { content: "まだメンバーがいません。上の欄から追加してください。"; color: var(--muted); font-size: 13px; }
+.member {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; border-radius: 6px; background: #fff; border: 1px solid var(--line);
+}
+.member.bad { border-color: var(--warn-line); background: var(--warn-bg); }
+.member label { flex: 1; flex-direction: row; align-items: center; gap: 8px; font-weight: 400; cursor: pointer; min-width: 0; }
+.member .who { min-width: 0; }
+.member .who b { display: block; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.member .who span { display: block; font-size: 11px; color: var(--muted); }
+.member .del { border: none; background: none; color: var(--muted); padding: 2px 6px; }
+.member .del:hover { color: var(--danger); background: none; }
+
+.out-block { padding: 14px 0; border-top: 1px solid var(--line); }
+.out-block:first-of-type { border-top: none; padding-top: 4px; }
+
+.issues { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; }
+.issues ul { margin: 6px 0 0; padding-left: 20px; }
+.issues li { font-size: 13px; }
+
+a.bookmarklet {
+  display: inline-block; padding: 8px 16px; border-radius: 6px;
+  background: var(--accent); color: var(--accent-ink); text-decoration: none; font-weight: 600;
+}
+a.bookmarklet:hover { filter: brightness(1.08); }
+
+.warnbox:empty { display: none; }
+.warnbox { color: var(--danger); font-size: 13px; margin: 8px 0 0; }
+
+details { margin-top: 10px; }
+summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+details textarea { width: 100%; margin-top: 8px; font: 12px/1.4 ui-monospace, Consolas, monospace; }
+
+.filebtn { display: inline-block; padding: 7px 14px; border: 1px solid var(--line); border-radius: 6px; background: #fff; cursor: pointer; font-size: 15px; font-weight: 400; }
+.filebtn:hover { background: #eef1f5; }
+.filebtn input { display: none; }
+
+footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 30px; }
+
+table.review { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.review td { border-top: 1px solid var(--line); padding: 5px 8px 5px 0; vertical-align: top; }
+table.review tr:first-child td { border-top: none; }
+table.review td:first-child { width: 34%; font-weight: 600; white-space: nowrap; }
+table.review td.muted { color: var(--muted); }
+table.review td.warn-cell { color: var(--danger); }
+
+.hidden { display: none !important; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>学傷補・学賠補 活動届 入力支援</h1>
+  <p class="lead">
+    毎回同じ入力を省いて、参加者名簿の Excel を自動で作ります。
+    <strong>データはこのパソコンの中だけに保存され、どこにも送信されません。</strong>
+  </p>
+  <p class="ver" id="version"></p>
+</header>
+
+<!-- ── 初回設定ゲート ───────────────────────────── -->
+<section id="gate" class="card warn hidden">
+  <h2>はじめに、あなたの情報を設定してください</h2>
+  <p>
+    ここが空のままだと、他の人の名前で申請してしまう事故が起きます。
+    設定が終わるまで名簿の作成とフォーム入力は使えません。
+  </p>
+</section>
+
+<!-- ── 1. 個人設定 ─────────────────────────────── -->
+<section class="card" id="sec-personal">
+  <h2>1. あなたの情報 <span class="badge person">各自で入力</span></h2>
+  <p class="note">この欄は人によって違います。配布されたファイルを使う場合も、ここは必ず自分で入れ直してください。</p>
+  <div class="grid">
+    <label>氏名<input id="p-name" placeholder="早稲田 太郎"></label>
+    <label>カナ氏名<input id="p-kana" placeholder="ワセダ　タロウ"><small>名簿に使います。全角カナ、姓名の間は全角スペース</small></label>
+    <label>学籍番号<input id="p-sid" placeholder="1A123456"><small>半角英数8桁。ハイフン以降は入れません</small></label>
+    <label>大学のメールアドレス<input id="p-mail1" placeholder="xxxx@waseda.jp"></label>
+    <label>連絡先メールアドレス<input id="p-mail2" placeholder="xxxx@ruri.waseda.jp"></label>
+  </div>
+</section>
+
+<!-- ── 2. 団体設定 ─────────────────────────────── -->
+<section class="card" id="sec-org">
+  <h2>2. 団体の情報 <span class="badge org">団体で共通</span></h2>
+  <p class="note">サークルで1人が設定して、JSON書き出しで配れば他の人は入力不要です。</p>
+  <div class="grid">
+    <label>団体名<input id="o-org" placeholder="生物同好会"></label>
+    <label>活動名（フォーム用）<input id="o-act" placeholder="生物同好会での活動"><small>フォームの「科目名 / 行事名 / 活動名」に入ります</small></label>
+    <label>責任者名<input id="o-resp" placeholder="顧問または代表者の氏名"></label>
+    <label>加入を希望する補償制度<select id="o-ins"></select></label>
+    <label>活動の種類<select id="o-kind"></select></label>
+    <label id="o-allreg-wrap" class="hidden">参加者は全員科目登録者ですか<select id="o-allreg"></select><small>「1.授業」を選んだときだけフォームに出る設問です</small></label>
+    <label>活動主管箇所名<select id="o-window"></select></label>
+    <label id="o-window-other-wrap" class="hidden">箇所名（その他を選んだ場合）<input id="o-window-other" placeholder="箇所名"></label>
+    <label>既定の活動場所<input id="o-place" placeholder="早稲田キャンパス"></label>
+    <label>既定の活動場所（国内/海外）<select id="o-area"></select></label>
+  </div>
+  <p class="note">選択式の項目は、フォームの選択肢をそのまま並べています（英語まで含めて一致していないとフォーム側で弾かれるため）。</p>
+</section>
+
+<!-- ── 3. メンバー辞書 ─────────────────────────── -->
+<section class="card" id="sec-members">
+  <h2>3. メンバー辞書</h2>
+  <p class="note">一度登録すれば、次回からはチェックを入れるだけで名簿に載ります。</p>
+  <div class="member-add">
+    <input id="m-sid" placeholder="学籍番号 1A123456" size="12">
+    <input id="m-kana" placeholder="カナ氏名 ワセダ　タロウ" size="18">
+    <input id="m-name" placeholder="表示名 早稲田太郎" size="14">
+    <button id="m-add" class="primary">追加</button>
+    <button id="m-add-self" class="ghost">自分を追加</button>
+  </div>
+  <div class="member-tools">
+    <input id="m-filter" placeholder="名前・学籍番号で絞り込み" size="22">
+    <button id="m-all" class="ghost">全員選択</button>
+    <button id="m-none" class="ghost">選択解除</button>
+    <span id="m-count" class="count"></span>
+  </div>
+  <div id="member-list" class="member-list"></div>
+</section>
+
+<!-- ── 4. 活動情報 ─────────────────────────────── -->
+<section class="card" id="sec-activity">
+  <h2>4. 今回の活動</h2>
+  <p class="note">ここに1回入れれば、フォームと名簿の両方に反映されます。名簿の申請年月日は本日の日付が自動で入ります。</p>
+  <div class="grid">
+    <label>活動内容<textarea id="a-content" rows="2" placeholder="フィールドワーク（採集・観察）"></textarea></label>
+    <label>活動場所<input id="a-place" placeholder="○○県○○市 ○○川河川敷"></label>
+    <label>活動開始日<input id="a-start" type="date"></label>
+    <label>活動終了日<input id="a-end" type="date"></label>
+    <label>備考（任意）<textarea id="a-remarks" rows="2" placeholder="特になければ空のままで構いません"></textarea></label>
+  </div>
+  <p class="note" id="count-badge"></p>
+  <div class="preset-row">
+    <select id="preset-sel"><option value="">プリセットを選ぶ…</option></select>
+    <button id="preset-save" class="ghost">今の内容をプリセット保存</button>
+    <button id="preset-del" class="ghost">選択中のプリセットを削除</button>
+  </div>
+</section>
+
+<!-- ── 5. 出力 ─────────────────────────────────── -->
+<section class="card" id="sec-output">
+  <h2>5. 作る</h2>
+  <div id="issues" class="issues hidden"></div>
+
+  <div class="out-block">
+    <h3>① 参加者名簿（Excel）</h3>
+    <p class="note">大学配布のテンプレートをそのまま使い、値だけ差し込みます。書式・テーブル・入力規則は原本のまま残ります。</p>
+    <div id="save-target-section" style="margin-bottom:12px">
+      <p class="note" style="font-size:12px;margin-bottom:6px">
+        <strong>保存先フォルダの設定（Edge/Chrome 限定）：</strong>
+        初回だけフォルダを選んでおくと、同名ファイルがあるときに自動的に <code>old/</code> フォルダへ移してから保存するようになります。
+        file:// で開いた場合は動作しない可能性があります。その場合は下の「ダウンロード」ボタンを使ってください。
+      </p>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button id="btn-pick-folder" class="ghost" style="font-size:12px">フォルダを選ぶ</button>
+        <span id="save-target-status" style="font-size:12px;color:#666"></span>
+      </div>
+    </div>
+    <button id="btn-roster" class="primary big">名簿をダウンロード</button>
+    <span id="roster-msg" class="msg"></span>
+  </div>
+
+  <div class="out-block">
+    <h3>フォームに入る内容の確認</h3>
+    <p class="note">自動入力でフォームのどの設問に何が入るかの一覧です。ここで確認してから実行してください。</p>
+    <div id="review"></div>
+  </div>
+
+  <div class="out-block" id="prefill-block">
+    <h3>② フォームを開く（値が入った状態で）</h3>
+    <p class="note">
+      下のリンクを押すと、値が入った状態でフォームが開きます。<strong>これが本命です。</strong>
+    </p>
+    <p>
+      <a id="prefill-link" href="#" target="_blank" rel="noopener" class="bookmarklet">値を入れてフォームを開く</a>
+      <span class="count" id="prefill-count"></span>
+    </p>
+    <p class="count">
+      <label><input type="checkbox" id="shorten-url"> URLを短くする（「URLが長すぎる」と言われたとき）</label>
+    </p>
+    <p class="count">このリンクには氏名とメールアドレスが含まれます。他人に送らないでください。</p>
+    <div class="count" id="prefill-note"></div>
+
+    <details>
+      <summary>前回の内容が残っているとき</summary>
+      <p class="note">
+        Microsoft Forms は<strong>書きかけの回答（下書き）を保存します</strong>。
+        前に開いたときの選択が残っていることがあります。
+      </p>
+      <p class="note">
+        事前入力リンクは<strong>値を送った設問だけを上書きします</strong>。
+        送っていない設問に前回の値が残っていたら、手で直してください。
+        とくに<strong>活動の種類</strong>は、選び方によって出てくる設問が変わるので、
+        意図した値になっているか確認してください。
+      </p>
+      <p class="note">
+        入らなかった項目は、下の<strong>③のブックマークレット</strong>で埋められます。
+        ③は画面を直接操作するので、確実に上書きします。
+      </p>
+    </details>
+  </div>
+
+  <div class="out-block">
+    <h3>③ 入らなかった項目を埋める（保険）</h3>
+    <p class="note">
+      ②で入りきらなかったときに使います。②で開いたフォームの上でこのブックマークをクリックすると、
+      <strong>15問すべてを埋め直します。</strong>画面右上に「どの設問に何が入ったか」の一覧が出ます。
+    </p>
+    <p>
+      <a id="bm-link" href="#" class="bookmarklet">学傷補・学賠補フォーム自動入力</a>
+      <span id="bm-size" class="count"></span>
+    </p>
+    <p class="note">
+      初回だけ、上の青いボタンを<strong>ブックマークバーにドラッグ</strong>して登録してください
+      （<code>Ctrl</code> + <code>Shift</code> + <code>B</code> でバーが出ます）。
+      <strong>登録は一度きり</strong>で、設定を変えても大学がフォームを変えても登録し直しは要りません。
+      <strong>入力後は必ず目で確認してから送信してください。</strong>
+    </p>
+    <details>
+      <summary>ドラッグできないとき（コードをコピーして手動でブックマークに貼る）</summary>
+      <textarea id="bm-text" rows="4" readonly></textarea>
+      <button id="bm-copy" class="ghost">コードをコピー</button>
+    </details>
+    <p class="warnbox" id="bm-warn"></p>
+  </div>
+</section>
+
+<!-- ── 6. データ管理 ───────────────────────────── -->
+<section class="card" id="sec-data">
+  <h2>6. 設定の保存・受け渡し</h2>
+  <p class="note">
+    書き出したファイルには参加者の学籍番号と氏名が入ります。共有範囲に注意してください。
+  </p>
+  <div class="io-row">
+    <select id="exp-mode"></select>
+    <button id="btn-export" class="ghost">JSONで書き出す</button>
+    <label class="filebtn">JSONを読み込む<input id="imp-file" type="file" accept="application/json,.json"></label>
+    <button id="btn-clear" class="danger">この端末のデータを全部消す</button>
+  </div>
+  <p id="io-msg" class="msg"></p>
+
+  <details>
+    <summary>フォームの設問マッピングを更新する（フォームが変わって入力がズレたとき）</summary>
+    <p class="note">
+      調査用ブックマークレットをフォーム上で実行して出てきた JSON を、ここに貼り付けてください。
+      設問 ID が取れていれば、上の「事前入力リンク」も使えるようになります。
+    </p>
+    <p><a id="probe-link" href="#" class="bookmarklet">フォーム調査（開発者に送る用）</a></p>
+    <textarea id="probe-paste" rows="5" placeholder="調査結果の JSON をここに貼り付け"></textarea>
+    <button id="probe-apply" class="ghost">取り込む</button>
+    <span id="probe-msg" class="msg"></span>
+  </details>
+</section>
+
+<footer>
+  <p>
+    このツールは入力補助です。記載内容の正確性と申請の責任は利用者本人にあります。
+    送信前に必ず内容を確認してください。
+  </p>
+</footer>
+
+
+<script>
+/* zip.js — xlsx(=zip)を「変更しないエントリは圧縮済みバイト列のまま」で組み直すための最小実装。
+ *
+ * なぜライブラリを使わないか:
+ *   名簿テンプレには大学側の SharePoint / Power Automate が参照するメタデータ
+ *   (customXml/*, docProps/custom.xml の ContentTypeId)と、Excel テーブル定義・
+ *   数式・データ検証が入っている。汎用の xlsx ライブラリは読み書きの過程でこれらを
+ *   落とすことがあるため、「触るファイル以外は 1 バイトも変えない」を保証できる
+ *   zip レベルの操作に寄せている。
+ *
+ * 圧縮/展開はブラウザ標準の CompressionStream / DecompressionStream を使うので依存ゼロ。
+ */
+(function (root) {
+  'use strict';
+
+  var CRC_TABLE = (function () {
+    var t = new Uint32Array(256);
+    for (var n = 0; n < 256; n++) {
+      var c = n;
+      for (var k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+      t[n] = c >>> 0;
+    }
+    return t;
+  })();
+
+  function crc32(bytes) {
+    var c = 0xffffffff;
+    for (var i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+    return (c ^ 0xffffffff) >>> 0;
+  }
+
+  async function pipe(bytes, stream) {
+    var blob = new Blob([bytes]);
+    var res = new Response(blob.stream().pipeThrough(stream));
+    return new Uint8Array(await res.arrayBuffer());
+  }
+
+  function inflateRaw(bytes) { return pipe(bytes, new DecompressionStream('deflate-raw')); }
+  function deflateRaw(bytes) { return pipe(bytes, new CompressionStream('deflate-raw')); }
+
+  /** zip の中央ディレクトリを読んで、エントリ一覧を返す。 */
+  function parse(bytes) {
+    var dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    var eocd = -1;
+    for (var i = bytes.length - 22; i >= 0; i--) {
+      if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error('zip の終端レコード(EOCD)が見つかりません。ファイルが壊れている可能性があります。');
+
+    var count = dv.getUint16(eocd + 10, true);
+    var p = dv.getUint32(eocd + 16, true);
+    var dec = new TextDecoder('utf-8');
+    var entries = [];
+
+    for (var n = 0; n < count; n++) {
+      if (dv.getUint32(p, true) !== 0x02014b50) throw new Error('中央ディレクトリの署名が不正です。');
+      var nameLen = dv.getUint16(p + 28, true);
+      var extraLen = dv.getUint16(p + 30, true);
+      var cmtLen = dv.getUint16(p + 32, true);
+      var lho = dv.getUint32(p + 42, true);
+
+      // ローカルヘッダ側の可変長は中央ディレクトリ側と一致しないことがあるので、実物を読む
+      var lNameLen = dv.getUint16(lho + 26, true);
+      var lExtraLen = dv.getUint16(lho + 28, true);
+      var dataStart = lho + 30 + lNameLen + lExtraLen;
+      var csize = dv.getUint32(p + 20, true);
+
+      entries.push({
+        name: dec.decode(bytes.subarray(p + 46, p + 46 + nameLen)),
+        flags: dv.getUint16(p + 8, true),
+        method: dv.getUint16(p + 10, true),
+        dosTime: dv.getUint16(p + 12, true),
+        dosDate: dv.getUint16(p + 14, true),
+        crc: dv.getUint32(p + 16, true),
+        csize: csize,
+        usize: dv.getUint32(p + 24, true),
+        raw: bytes.subarray(dataStart, dataStart + csize)   // 圧縮されたままのバイト列
+      });
+      p += 46 + nameLen + extraLen + cmtLen;
+    }
+    return entries;
+  }
+
+  /** エントリの中身を展開して Uint8Array で返す。 */
+  function read(entry) {
+    if (entry.method === 0) return Promise.resolve(entry.raw);
+    if (entry.method === 8) return inflateRaw(entry.raw);
+    return Promise.reject(new Error('未対応の圧縮方式です: ' + entry.method + ' (' + entry.name + ')'));
+  }
+
+  function readText(entry) {
+    return read(entry).then(function (b) { return new TextDecoder('utf-8').decode(b); });
+  }
+
+  /**
+   * zip を組み直す。
+   * @param entries parse() の戻り値
+   * @param replace {[name]: Uint8Array}  差し替える中身(非圧縮)
+   * @param drop    string[]              取り除くエントリ名
+   */
+  async function build(entries, replace, drop) {
+    replace = replace || {};
+    drop = new Set(drop || []);
+    var enc = new TextEncoder();
+    var chunks = [];      // ローカルヘッダ + データ
+    var central = [];
+    var offset = 0;
+
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      if (drop.has(e.name)) continue;
+
+      var nameBytes = enc.encode(e.name);
+      var method, data, crc, usize;
+
+      if (Object.prototype.hasOwnProperty.call(replace, e.name)) {
+        var plain = replace[e.name];
+        data = await deflateRaw(plain);
+        method = 8;
+        crc = crc32(plain);
+        usize = plain.length;
+      } else {
+        // 手を付けないエントリは圧縮済みのバイト列をそのままコピーする
+        method = e.method;
+        data = e.raw;
+        crc = e.crc;
+        usize = e.usize;
+      }
+
+      // データ記述子(bit 3)は使わないのでフラグから落とす
+      var flags = e.flags & ~0x08;
+
+      var lh = new Uint8Array(30 + nameBytes.length);
+      var lv = new DataView(lh.buffer);
+      lv.setUint32(0, 0x04034b50, true);
+      lv.setUint16(4, 20, true);
+      lv.setUint16(6, flags, true);
+      lv.setUint16(8, method, true);
+      lv.setUint16(10, e.dosTime, true);
+      lv.setUint16(12, e.dosDate, true);
+      lv.setUint32(14, crc, true);
+      lv.setUint32(18, data.length, true);
+      lv.setUint32(22, usize, true);
+      lv.setUint16(26, nameBytes.length, true);
+      lv.setUint16(28, 0, true);
+      lh.set(nameBytes, 30);
+
+      var ch = new Uint8Array(46 + nameBytes.length);
+      var cv = new DataView(ch.buffer);
+      cv.setUint32(0, 0x02014b50, true);
+      cv.setUint16(4, 20, true);
+      cv.setUint16(6, 20, true);
+      cv.setUint16(8, flags, true);
+      cv.setUint16(10, method, true);
+      cv.setUint16(12, e.dosTime, true);
+      cv.setUint16(14, e.dosDate, true);
+      cv.setUint32(16, crc, true);
+      cv.setUint32(20, data.length, true);
+      cv.setUint32(24, usize, true);
+      cv.setUint16(28, nameBytes.length, true);
+      cv.setUint32(42, offset, true);
+      ch.set(nameBytes, 46);
+
+      chunks.push(lh, data);
+      central.push(ch);
+      offset += lh.length + data.length;
+    }
+
+    var cdSize = central.reduce(function (s, c) { return s + c.length; }, 0);
+    var end = new Uint8Array(22);
+    var ev = new DataView(end.buffer);
+    ev.setUint32(0, 0x06054b50, true);
+    ev.setUint16(8, central.length, true);
+    ev.setUint16(10, central.length, true);
+    ev.setUint32(12, cdSize, true);
+    ev.setUint32(16, offset, true);
+
+    var total = offset + cdSize + 22;
+    var out = new Uint8Array(total);
+    var pos = 0;
+    chunks.concat(central, [end]).forEach(function (c) { out.set(c, pos); pos += c.length; });
+    return out;
+  }
+
+  root.Zip = { parse: parse, read: read, readText: readText, build: build, crc32: crc32 };
+})(window.GSH = window.GSH || {});
+
+;
+/* roster-xlsx.js — 大学指定の名簿テンプレに値だけ差し込んで xlsx を作る。
+ *
+ * テンプレは原本のまま保ち、xl/worksheets/sheet1.xml と xl/workbook.xml だけを書き換え、
+ * xl/calcChain.xml を落とす。それ以外のエントリ(styles.xml / customXml/* / docProps/*)は
+ * 圧縮済みバイト列のまま素通しするので、大学側の SharePoint / Power Automate の処理を壊さない。
+ */
+(function (root) {
+  'use strict';
+
+  var SHEET = 'xl/worksheets/sheet1.xml';
+  var WORKBOOK = 'xl/workbook.xml';
+  var CALC_CHAIN = 'xl/calcChain.xml';
+
+  var FIRST_ROW = 11;   // テーブル1 のデータ行は 11〜60
+  var LAST_ROW = 60;
+  var MAX_MEMBERS = LAST_ROW - FIRST_ROW + 1;   // 50
+
+  function escapeXml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+  }
+
+  /** 'YYYY-MM-DD' を Excel のシリアル値(1899-12-30 起点)に変換する。 */
+  function toSerial(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso).trim());
+    if (!m) throw new Error('日付は YYYY-MM-DD 形式で指定してください: ' + iso);
+    var days = (Date.UTC(+m[1], +m[2] - 1, +m[3]) - Date.UTC(1899, 11, 30)) / 86400000;
+    return Math.round(days);
+  }
+
+  function todayIso() {
+    var d = new Date();
+    var p = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+
+  // 空セル <c r="B11" s="3"/> を探して中身を入れる。
+  // テンプレ側でセルが存在しない/既に埋まっている場合は、想定と違うテンプレなので例外にする。
+  function fillCell(xml, ref, inner) {
+    var re = new RegExp('<c r="' + ref + '"([^>/]*)/>');
+    if (!re.test(xml)) {
+      throw new Error('テンプレの空セル ' + ref + ' が見つかりません。名簿テンプレが更新された可能性があります。');
+    }
+    return xml.replace(re, function (_, attrs) { return '<c r="' + ref + '"' + attrs + '>' + inner + '</c>'; });
+  }
+
+  function setString(xml, ref, value) {
+    var re = new RegExp('<c r="' + ref + '"([^>/]*)/>');
+    if (!re.test(xml)) {
+      throw new Error('テンプレの空セル ' + ref + ' が見つかりません。名簿テンプレが更新された可能性があります。');
+    }
+    return xml.replace(re, function (_, attrs) {
+      return '<c r="' + ref + '"' + attrs + ' t="inlineStr"><is><t xml:space="preserve">' + escapeXml(value) + '</t></is></c>';
+    });
+  }
+
+  function setNumber(xml, ref, value) {
+    return fillCell(xml, ref, '<v>' + value + '</v>');
+  }
+
+  // H列の status は数式列。キャッシュ値 F が残ったままだと開いた直後に F と表示されるので
+  // T に書き換える(併せて workbook.xml に fullCalcOnLoad を立てて再計算もさせる)。
+  function setStatusT(xml, row) {
+    var re = new RegExp('(<c r="H' + row + '"[\\s\\S]*?)<v>F</v>');
+    if (!re.test(xml)) {
+      throw new Error('H' + row + ' の status セルが想定と異なります。名簿テンプレが更新された可能性があります。');
+    }
+    return xml.replace(re, '$1<v>T</v>');
+  }
+
+  /**
+   * 参加者名簿の xlsx バイト列を作る。
+   *
+   * @param {Uint8Array} templateBytes  テンプレ xlsx の中身
+   * @param {Object} data
+   *   申請者氏名, 活動名, 責任者名 : ヘッダ部(B1/B2/B3)
+   *   活動場所, 活動開始日, 活動終了日 : 全参加者共通の値
+   *   申請年月日 : 省略時は当日
+   *   members : [{ 学籍番号, カナ氏名 }]
+   * @returns {Promise<Uint8Array>}
+   */
+  async function generate(templateBytes, data) {
+    var members = data.members || [];
+    if (members.length === 0) throw new Error('参加者が 1 人も選ばれていません。');
+    if (members.length > MAX_MEMBERS) {
+      throw new Error('参加者が ' + members.length + ' 名です。このテンプレは ' + MAX_MEMBERS +
+        ' 名までなので、超える分は Excel で行を追加し、テーブル1 の範囲を広げてください。');
+    }
+
+    var 申請年月日 = toSerial(data.申請年月日 || todayIso());
+    var 活動開始日 = toSerial(data.活動開始日);
+    var 活動終了日 = toSerial(data.活動終了日);
+    if (活動終了日 < 活動開始日) throw new Error('活動終了日が活動開始日より前になっています。');
+
+    var entries = root.Zip.parse(templateBytes);
+    var byName = {};
+    entries.forEach(function (e) { byName[e.name] = e; });
+    if (!byName[SHEET] || !byName[WORKBOOK]) {
+      throw new Error('テンプレの構成が想定と違います(sheet1.xml / workbook.xml が見つかりません)。');
+    }
+
+    var xml = await root.Zip.readText(byName[SHEET]);
+
+    xml = setString(xml, 'B1', data.申請者氏名 || '');
+    xml = setString(xml, 'B2', data.活動名 || '');
+    xml = setString(xml, 'B3', data.責任者名 || '');
+
+    members.forEach(function (m, i) {
+      var row = FIRST_ROW + i;
+      xml = setString(xml, 'B' + row, m.学籍番号);
+      xml = setString(xml, 'C' + row, m.カナ氏名);
+      xml = setNumber(xml, 'D' + row, 申請年月日);
+      xml = setNumber(xml, 'E' + row, 活動開始日);
+      xml = setNumber(xml, 'F' + row, 活動終了日);
+      xml = setString(xml, 'G' + row, data.活動場所 || '');
+      xml = setStatusT(xml, row);
+    });
+
+    var wb = await root.Zip.readText(byName[WORKBOOK]);
+    if (!/fullCalcOnLoad/.test(wb)) {
+      wb = wb.replace(/<calcPr([^>]*?)\/>/, '<calcPr$1 fullCalcOnLoad="1"/>');
+    }
+
+    var enc = new TextEncoder();
+    var out = await root.Zip.build(entries, (function () {
+      var r = {};
+      r[SHEET] = enc.encode(xml);
+      r[WORKBOOK] = enc.encode(wb);
+      return r;
+    })(), [CALC_CHAIN]);
+
+    return out;
+  }
+
+  /** 入力値の問題点を配列で返す(空なら問題なし)。テンプレ行9の注意書きに対応。 */
+  function validateMember(m) {
+    var problems = [];
+    var id = String(m.学籍番号 || '');
+    var kana = String(m.カナ氏名 || '');
+    if (!/^[0-9A-Za-z]{8}$/.test(id)) {
+      problems.push('学籍番号「' + id + '」は半角英数字8桁ではありません(ハイフン以降は入れません。例 1A123456)');
+    }
+    if (!/^[ァ-ヶー]+　[ァ-ヶー]+$/.test(kana)) {
+      problems.push('カナ氏名「' + kana + '」は「全角カナ + 全角スペース + 全角カナ」になっていません(例 ワセダ　タロウ)');
+    }
+    return problems;
+  }
+
+  root.Roster = {
+    generate: generate,
+    validateMember: validateMember,
+    toSerial: toSerial,
+    todayIso: todayIso,
+    MAX_MEMBERS: MAX_MEMBERS
+  };
+})(window.GSH = window.GSH || {});
+
+;
+/* store.js — 設定・メンバー辞書の保存と入出力。
+ *
+ * 二次配布のために「個人設定(personal)」と「団体設定(org)」を分けている。
+ * personal は各自が必ず自分で入れる層で、団体配布用のエクスポートには含めない。
+ * ここを混ぜると、配られた人が全員かおるさん名義で申請してしまう。
+ */
+(function (root) {
+  'use strict';
+
+  var KEY = 'gakushoho.v1';
+  var SCHEMA = 1;
+
+  function blank() {
+    return {
+      schemaVersion: SCHEMA,
+      personal: {
+        氏名: '', カナ氏名: '', 学籍番号: '',
+        大学メール: '', 連絡先メール: '',
+        設定日時: ''
+      },
+      /* 選択式の項目は、フォームが要求する正式文字列をそのまま持つ。
+       * 「学生生活課」ではなく「学生生活課 Student Affairs Section」。
+       * 事前入力は完全一致でないと通らないし、DOM クリックも完全一致で照合するため。 */
+      org: {
+        団体名: '', 活動名: '', 責任者名: '',
+        加入区分: '1. 学傷補のみ加入 Register only for “Compensation for Injury”',
+        活動区分: '7.その他 Other',
+        申請先: '学生生活課 Student Affairs Section',
+        申請先その他: '',        // 申請先が「その他」のときだけ使う
+        既定の活動場所: '',
+        既定の国内外: '1.国内 Domestic'
+      },
+      members: [],
+      presets: [],
+      formMap: null,        // 調査ブックマークレットの結果を取り込んだら入る
+      /* 事前入力のパラメータ名の綴り。実機でしか判定できないので、
+       * 利用者が「効いたほう」を選んだ結果をここに保存する。
+       * null = 未判定（form-map.json の既定値を使う）／'' = 設問IDそのまま／'r' = r を前置 */
+      prefillPrefix: null,
+      prefillMaxParams: 0,  // Forms が先頭N問しか処理しない場合の上限。0 は無制限
+      shortenUrl: false,    // 「URLが長すぎる」と言われたときに、長い自由記述を事前入力から外す
+      draft: {
+        活動内容: '', 活動場所: '', 活動開始日: '', 活動終了日: '', 備考: '', 参加者: []
+      }
+    };
+  }
+
+  function load() {
+    var data;
+    try {
+      var raw = localStorage.getItem(KEY);
+      data = raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      data = null;
+    }
+    if (!data || data.schemaVersion !== SCHEMA) return blank();
+    // 後から足したキーが欠けていても落ちないように、既定値で埋める
+    var base = blank();
+    ['personal', 'org', 'draft'].forEach(function (k) {
+      data[k] = Object.assign({}, base[k], data[k] || {});
+    });
+    data.members = data.members || [];
+    data.presets = data.presets || [];
+    // 後から足したトップレベルの項目も既定値で埋める
+    Object.keys(base).forEach(function (k) {
+      if (data[k] === undefined) data[k] = base[k];
+    });
+    return data;
+  }
+
+  function save(data) {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(data));
+      return { ok: true };
+    } catch (e) {
+      // file:// で開いている・プライベートウィンドウ等で書けないことがある
+      return { ok: false, error: '設定を保存できませんでした(' + (e && e.message) + ')。' +
+        'JSON書き出しでバックアップを取ってください。' };
+    }
+  }
+
+  function clear() {
+    try { localStorage.removeItem(KEY); } catch (e) { /* 消せなくても続行 */ }
+  }
+
+  /** 個人設定が埋まっているか。埋まるまでは他の機能を使わせない。 */
+  function isPersonalReady(data) {
+    var p = data.personal;
+    return !!(p.氏名 && p.大学メール);
+  }
+
+  function newId() {
+    return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  // ---- エクスポート/インポート ------------------------------------
+  // 3モード。「団体配布用」だけは personal を物理的に含めない。
+  var MODES = {
+    org: { label: '団体配布用(個人情報を含めない)', keys: ['org', 'members', 'presets', 'formMap'] },
+    all: { label: '端末移行用(すべて)', keys: ['personal', 'org', 'members', 'presets', 'formMap'] },
+    members: { label: 'メンバー辞書のみ', keys: ['members'] }
+  };
+
+  function exportData(data, mode) {
+    var spec = MODES[mode] || MODES.org;
+    var out = { schemaVersion: SCHEMA, exportMode: mode, exportedAt: new Date().toISOString() };
+    spec.keys.forEach(function (k) { out[k] = data[k]; });
+    if (mode !== 'org' || (data.members && data.members.length)) {
+      out._注意 = 'このファイルには参加者の学籍番号と氏名が含まれます。共有範囲に注意してください。';
+    }
+    return JSON.stringify(out, null, 2);
+  }
+
+  /**
+   * インポート。members は学籍番号をキーに重複排除する。
+   * personal は「端末移行用」を読み込んだときだけ上書きする。
+   */
+  function importData(current, json) {
+    var incoming = JSON.parse(json);
+    if (incoming.schemaVersion !== SCHEMA) {
+      throw new Error('対応していないバージョンのファイルです(schemaVersion=' + incoming.schemaVersion + ')。');
+    }
+    var next = JSON.parse(JSON.stringify(current));
+    var report = [];
+
+    if (incoming.personal) {
+      next.personal = Object.assign({}, next.personal, incoming.personal);
+      report.push('個人設定を上書きしました');
+    }
+    if (incoming.org) {
+      next.org = Object.assign({}, next.org, incoming.org);
+      report.push('団体設定を取り込みました');
+    }
+    if (incoming.presets) {
+      next.presets = incoming.presets;
+      report.push('活動プリセットを ' + incoming.presets.length + ' 件取り込みました');
+    }
+    if (incoming.formMap) {
+      next.formMap = incoming.formMap;
+      report.push('設問マッピングを取り込みました');
+    }
+    if (incoming.members) {
+      var seen = {};
+      next.members.forEach(function (m) { seen[m.学籍番号] = m; });
+      var added = 0, updated = 0;
+      incoming.members.forEach(function (m) {
+        if (seen[m.学籍番号]) { Object.assign(seen[m.学籍番号], m); updated++; }
+        else { next.members.push(Object.assign({ id: newId() }, m)); added++; }
+      });
+      report.push('メンバーを ' + added + ' 件追加、' + updated + ' 件更新しました');
+    }
+    return { data: next, report: report };
+  }
+
+  root.Store = {
+    load: load, save: save, clear: clear, blank: blank,
+    isPersonalReady: isPersonalReady, newId: newId,
+    exportData: exportData, importData: importData, MODES: MODES
+  };
+})(window.GSH = window.GSH || {});
+
+;
+/* prefill.js — Microsoft Forms の事前入力 URL を組み立てる。
+ *
+ * ★ URL の長さについて（AADSTS90015）
+ *
+ *   `AADSTS90015: Requested query string is too long` が出たことがある。
+ *   このとき内訳を測ったら、URL 7,089文字のうち **5,652文字（80%）がハッシュ**
+ *   （ブックマークレットに値を渡す `#gsh=`）で、事前入力クエリは1,292文字だった。
+ *   膨らませていたのはハッシュのほうだった。
+ *
+ *   いまはハッシュを載せず事前入力クエリだけにしているので 1,437文字。
+ *   それでも長い場合に備えて、`maxUrl` を下げると優先度の低い設問から外れる。
+ *   ただし**分岐を開く設問（unlocksMore）は絶対に外さない**。
+ *   ここが外れると後続の設問が画面に出てこなくなり、事前入力どころではなくなる。
+ *
+ * ★ 「1〜3番しか入らない」の真因（2026-08-25 に実機で決着）
+ *
+ *   原因は書式でもキャッシュでもURL長でもなく、**選択肢の文字列が壊れていたこと**だった。
+ *   probe.js が選択肢を読むときに `label.replace(/\s+/g, ' ')` をしていて、
+ *   JS の \s が全角スペース（U+3000）と改行なし空白（U+00A0）にもマッチするため、
+ *   form-map.json に潰れた文字列が入っていた。
+ *
+ *     実物: 1.[U+3000]学傷補のみ加入[U+00A0][半角]Register only for “Compensation for Injury”
+ *     保存: 1.[半角]学傷補のみ加入[半角]Register only for “Compensation for Injury”
+ *
+ *   事前入力は完全一致が要るので、選択肢は一つも一致しなかった。
+ *   テキスト（1〜3番）は利用者の入力値をそのまま送るので無傷 → だから毎回きっちり1〜3。
+ *   5番（ラジオ）が入らないので段階表示が開かず、6番以降は画面にすら出なかった。
+ *
+ *   正確な文字列は **input[type=radio] の value 属性**（と祖先の data-automation-value）にある。
+ *   表示テキストは整形の影響を受けるので使わない。probe v3 はここから採る。
+ *
+ * ★ 値の書式（実測）
+ *
+ *   | 種別 | 書式 | 例（エンコード前） |
+ *   |------|------|-------------------|
+ *   | 単一行/複数行テキスト | そのまま | `?rXXXX=山田太郎` |
+ *   | **選択肢（ラジオ・ドロップダウン）** | ダブルクォートで囲む | `?rXXXX="1.国内 Domestic"` |
+ *   | **日付** | yyyy-MM-dd をダブルクォートで囲む | `?rXXXX="2026-09-01"` |
+ *   | 評価・NPS | 数値そのまま | `?rXXXX=3` |
+ *
+ *   実測メモ：4番のラジオで**引用符ありとなしの両方が効いた**。囲まなくても通る。
+ *   文書化されている形に合わせて囲む方を採用している。**効かない原因は書式ではない。**
+ *   もし選択肢が入らなくなったら、まず疑うのは書式ではなく **文字列の一致**。
+ *   詳細は docs/事前入力の調査.md。
+ *
+ * 事前入力リンクは ?id=<フォームID>&<設問ID>=<値> という素のクエリ文字列。
+ *
+ * ■ 実機で分かったこと（2026-08-24）
+ *
+ *   1) 事前入力は「効く」。v1.1.0 のリンクで既存の下書きが上書きされた。
+ *
+ *   2) ただし **設問順に並んでいないと途中で打ち切られる**。
+ *      観測:
+ *        - v1.1.0: 設問順に並べたが4番だけURL長で脱落 → **1,2,3 が入り、4番の手前で停止**
+ *        - v1.1.1: 1,5,11,13 と飛び飛びに送った → **1問も入らない**
+ *      これを一つで説明できるのが「設問順に処理し、URLに無い設問に当たったら以降を捨てる」。
+ *
+ *   だから、この実装では次を守る。
+ *     - 設問順（order 昇順）に並べる
+ *     - **値が空でもパラメータを出す**（穴を空けない）
+ *     - 事前入力できない設問（ファイルアップロード）に達したら、そこで打ち切る
+ *     - URL が長すぎるときは **末尾から** 削る。途中を抜くと以降が全部死ぬので、
+ *       「重要度の低いものを抜く」方式は**この仕様のもとでは有害**
+ *
+ *   3) 綴りは素の設問ID（`r829848…`）。2通りを両方送るとパラメータ数が倍になり、
+ *      打ち切りを早めるだけで害しかない。二度とやらない。
+ */
+(function (root) {
+  'use strict';
+
+  // クエリ文字列の上限は IIS 系だと 2048 バイトのことがある。
+  // 実測では全15問で約1,300文字なので通常は当たらない。
+  var MAX_URL = 1900;
+
+  /** 空白を + ではなく %20 にする。選択肢は完全一致が要るので + だと外れる。 */
+  function enc(s) { return encodeURIComponent(String(s)); }
+
+  /** 改行は %0A に寄せる。CRLF のままだと余計な空行が入ることがある。 */
+  function normalizeValue(v) { return String(v == null ? '' : v).replace(/\r\n?/g, '\n'); }
+
+  /* 設問の種別ごとに値の書式を整える。ここを間違えるとその設問は入らず、
+   * それが分岐を開く設問だった場合、以降がまるごと画面に出なくなる。 */
+  function formatValue(q, raw) {
+    var v = normalizeValue(raw);
+    if (v === '') return '';
+    if (q.type === 'radio' || q.type === 'checkbox' || q.type === 'dropdown') {
+      /* 選択肢はダブルクォートで囲む（囲まなくても効くが、文書化されている形に合わせる）。
+       * 中身は **フォームが持っている文字列と1文字も違ってはいけない**。
+       * 全角スペース・NBSP・二重スペースを潰すと一致しない。
+       * form-map.json の choices は probe v3 が value 属性から採った生の文字列。 */
+      return '"' + v + '"';
+    }
+    if (q.type === 'date') {
+      // yyyy-MM-dd に正規化してから囲む（スラッシュ区切りでは受理されない）
+      var m = /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/.exec(v);
+      if (m) v = m[1] + '-' + String(m[2]).padStart(2, '0') + '-' + String(m[3]).padStart(2, '0');
+      return '"' + v + '"';
+    }
+    return v;   // テキスト・複数行テキストはそのまま
+  }
+
+  /**
+   * @param formUrl フォームの URL（?id= を含む）
+   * @param questions form-map の questions（order 昇順である必要はない。中で並べ替える）
+   * @param resolve   function(question) -> 値（無ければ '' を返す）
+   * @param opts      { prefix, maxUrl }
+   */
+  function build(formUrl, questions, resolve, opts) {
+    opts = opts || {};
+    var prefix = opts.prefix || '';
+    var maxUrl = opts.maxUrl || MAX_URL;
+
+    var u;
+    try { u = new URL(formUrl); } catch (e) {
+      return { url: null, included: [], skipped: [], usable: false, error: 'フォーム URL が不正です' };
+    }
+    var id = u.searchParams.get('id');
+    if (!id) {
+      return {
+        url: null, included: [], skipped: [], usable: false,
+        error: 'フォーム URL に id パラメータがありません。短縮 URL ではなく、フォームを開いた後の URL を使ってください。'
+      };
+    }
+    var base = u.origin + u.pathname;   // route=shorturl などは落とす
+
+    var ordered = questions.slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+
+    // 事前入力できない設問に達したら、そこから先は載せても無駄（打ち切られる）
+    var run = [];
+    var stoppedAt = null;
+    for (var i = 0; i < ordered.length; i++) {
+      var q = ordered[i];
+      if (!q.qid || q.type === 'file') { stoppedAt = q; break; }
+      run.push(q);
+    }
+
+    var skipped = [];
+    ordered.slice(run.length).forEach(function (q) {
+      skipped.push({
+        label: q.label,
+        reason: q.type === 'file' ? 'ファイル欄は事前入力できないため（手で添付します）'
+          : 'ファイル欄より後ろにあるため事前入力が届きません'
+      });
+    });
+
+    function compose(items) {
+      var parts = ['id=' + enc(id)];
+      items.forEach(function (q) {
+        // 値が空でもパラメータは出す。抜くと以降が全部無視される
+        parts.push(prefix + q.qid + '=' + enc(formatValue(q, resolve(q))));
+      });
+      return base + '?' + parts.join('&');
+    }
+
+    /* 長すぎるときは削る。ただし外す順番が重要。
+     *   - **分岐を開く設問（unlocksMore）は絶対に外さない。**
+     *     5番が外れると6〜8番が、8番が外れるとその先が画面に出てこなくなる
+     *   - 選択肢は選び直しが面倒なので残す
+     *   - 長い自由記述（活動内容・活動場所・科目名）から外す。手で書けばよいので
+     * 外した項目はブックマークレットが埋める。 */
+    function droppable(q) {
+      if (q.unlocksMore) return false;
+      return q.type === 'text' || q.type === 'textarea';
+    }
+    var current = run.slice();
+    var url = compose(current);
+    while (url.length > maxUrl) {
+      // 外してよいものの中から、URL を一番食っているものを外す
+      var cands = current.filter(droppable);
+      if (!cands.length) break;   // これ以上は削れない（分岐設問と選択肢しか残っていない）
+      var victim = cands.reduce(function (a, b) {
+        return enc(formatValue(b, resolve(b))).length > enc(formatValue(a, resolve(a))).length ? b : a;
+      });
+      current = current.filter(function (q) { return q !== victim; });
+      skipped.push({ label: victim.label, reason: 'URL を短くするため（ブックマークレットで埋まります）' });
+      url = compose(current);
+    }
+
+    return {
+      url: url,
+      included: current.map(function (q) { return q.label; }),
+      skipped: skipped,
+      usable: current.length > 0,
+      length: url.length,
+      stoppedAt: stoppedAt ? stoppedAt.label : null,
+      prefix: prefix
+    };
+  }
+
+  root.Prefill = { build: build, MAX_URL: MAX_URL, encode: enc };
+})(window.GSH = window.GSH || {});
+
+;
+/* save-target.js — File System Access API で、フォルダを選択して名簿を保存し、
+ * 既存ファイルを自動的に old/ サブフォルダへタイムスタンプ付きで退避する。
+ *
+ * Edge/Chrome 限定。file:// で secure context として扱われるかは実機確認必須。
+ * IndexedDB を使ってフォルダハンドルを保存しているため、localStorage は使わない。
+ */
+(function (root) {
+  'use strict';
+
+  const ORIGINAL_FILENAME = '学傷補・学賠補 活動届用 参加者名簿.xlsx';
+  const DB_NAME = 'gakushouho-save-target';
+  const STORE_NAME = 'folder-handle';
+
+  /* ─────────────────────────────────────────────────────────────── */
+  /* IndexedDB: フォルダハンドルの永続化 */
+  /* ─────────────────────────────────────────────────────────────── */
+
+  function getDB() {
+    return new Promise(function (resolve, reject) {
+      const req = window.indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = function (ev) {
+        const db = ev.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        }
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error); };
+    });
+  }
+
+  function saveHandleToDb(handle) {
+    return getDB().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        store.put({ id: 'saved', handle: handle });
+        tx.oncomplete = function () { resolve(); };
+        tx.onerror = function () { reject(tx.error); };
+      });
+    });
+  }
+
+  function loadHandleFromDb() {
+    return getDB().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.get('saved');
+        req.onsuccess = function () { resolve(req.result ? req.result.handle : null); };
+        req.onerror = function () { reject(req.error); };
+      });
+    });
+  }
+
+  /* ─────────────────────────────────────────────────────────────── */
+  /* Public API */
+  /* ─────────────────────────────────────────────────────────────── */
+
+  function isSupported() {
+    return typeof window.showDirectoryPicker === 'function';
+  }
+
+  async function pickFolder() {
+    if (!isSupported()) return null;
+    try {
+      const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+      await saveHandleToDb(handle);
+      return handle;
+    } catch (e) {
+      if (e.name === 'AbortError') return null;  // ユーザーがキャンセル
+      throw e;
+    }
+  }
+
+  async function getSavedFolderHandle() {
+    if (!isSupported()) return null;
+    try {
+      const handle = await loadHandleFromDb();
+      if (!handle) return null;
+      const perm = await handle.queryPermission({ mode: 'readwrite' });
+      if (perm === 'granted') return handle;
+      const reqPerm = await handle.requestPermission({ mode: 'readwrite' });
+      return reqPerm === 'granted' ? handle : null;
+    } catch (e) {
+      return null;  // ハンドルが無効になっている
+    }
+  }
+
+  function padZero(n) {
+    return String(n).padStart(2, '0');
+  }
+
+  function nowTimestamp() {
+    const d = new Date();
+    return d.getFullYear() +
+      padZero(d.getMonth() + 1) +
+      padZero(d.getDate()) + '_' +
+      padZero(d.getHours()) +
+      padZero(d.getMinutes()) +
+      padZero(d.getSeconds());
+  }
+
+  async function saveRoster(bytes) {
+    const dirHandle = await getSavedFolderHandle();
+    if (!dirHandle) return null;  // フォルダ未選択 or 権限なし、呼び出し側でフォールバック
+
+    try {
+      // 既存ファイルをチェック
+      let existingFile = null;
+      try {
+        const fileHandle = await dirHandle.getFileHandle(ORIGINAL_FILENAME, { create: false });
+        existingFile = fileHandle;
+      } catch (e) {
+        if (e.name !== 'NotFoundError') throw e;
+      }
+
+      // 既存ファイルがあれば old/ に退避
+      if (existingFile) {
+        try {
+          const oldDir = await dirHandle.getDirectoryHandle('old', { create: true });
+          const backupName = nowTimestamp() + '_' + ORIGINAL_FILENAME;
+          const backupHandle = await oldDir.getFileHandle(backupName, { create: true });
+          const existing = await existingFile.getFile();
+          const writable = await backupHandle.createWritable();
+          await writable.write(await existing.arrayBuffer());
+          await writable.close();
+        } catch (e) {
+          throw new Error('既存ファイルのバックアップに失敗しました: ' + (e && e.message || e));
+        }
+      }
+
+      // 新しい名簿を保存
+      const fileHandle = await dirHandle.getFileHandle(ORIGINAL_FILENAME, { create: true });
+      const writable = await fileHandle.createWritable({ keepExistingData: false });
+      await writable.write(bytes);
+      await writable.close();
+
+      return { filename: ORIGINAL_FILENAME, dirHandle: dirHandle };
+    } catch (e) {
+      throw new Error('名簿の保存に失敗しました: ' + (e && e.message || e));
+    }
+  }
+
+  root.SaveTarget = {
+    isSupported: isSupported,
+    ORIGINAL_FILENAME: ORIGINAL_FILENAME,
+    pickFolder: pickFolder,
+    getSavedFolderHandle: getSavedFolderHandle,
+    saveRoster: saveRoster
+  };
+})(window.GSH = window.GSH || {});
+
+;
+/* bookmarklet-gen.js — ブックマークレットと、そこへ渡す値の受け渡しを作る。
+ *
+ * ■ なぜ値を埋め込まないのか
+ *   以前はロジックと値を1本のブックマークレットに固めていた。そのため
+ *   **活動情報を変えるたびに登録し直しが必要**で、毎回申請内容が変わるこのツールでは
+ *   手軽さを最も損なっていた。さらに氏名・メール・学籍番号がコードに焼き込まれるので、
+ *   ブックマークレットを人に渡すと個人情報がそのまま漏れる。
+ *
+ * ■ いまの作り
+ *   - ブックマークレットは **ロジックだけ**。一度登録すればずっと同じ。
+ *     設定を変えても、大学がフォームを変えても登録し直し不要（設問マッピングも値と一緒に渡すため）。
+ *   - 値と設問マッピングは **URL のハッシュ（#gsh=…）** で渡す。
+ *     ハッシュはサーバに送信されないので、クエリ長の上限とも 404/414 とも無縁。
+ *
+ * ■ CSP
+ *   forms.cloud.microsoft は script-src に 'strict-dynamic' を含むので外部読み込みは不可。
+ *   ブックマークレットは自己完結でなければならない（だからロジックは丸ごと埋め込む）。
+ */
+(function (root) {
+  'use strict';
+
+  // ビルド時に filler.js の中身が差し込まれる
+  var FILLER_SOURCE = "/* filler.js — Microsoft Forms の設問を埋めるエンジン。生成されるブックマークレットの本体。\n *\n * 実行時に window.__GSH_PAYLOAD__ = { map: {...}, values: {...} } が入っている前提。\n * bookmarklet-gen.js がこの payload を頭に付けた形で組み立てる。\n *\n * ■ 設計の背景\n *   旧版は設問を「並び順」で指定していた。大学が設問を1つ追加した結果それ以降が\n *   ひとつずつズレ、責任者名が空・別の欄に誤入力・国内/海外が未選択という状態で\n *   申請が出ていた。しかも誰も気付かなかった。\n *\n *   そこで、\n *     - 設問は「設問ID」で特定する（設問を作り直さない限り不変）\n *     - 特定できなければ黙って進まず、必ず警告する\n *     - 入力したら必ず読み戻して、意図した値が入ったか確認する\n *   の3つを軸にしている。件数だけ報告しても意味がない。何がどう入ったかを見せる。\n *\n * ■ CSP（実測）\n *   forms.cloud.microsoft は require-trusted-types-for 'script' を返すため\n *   innerHTML への代入は TypeError で落ちる。UI は DOM API だけで組む。\n */\n(function () {\n  'use strict';\n\n  /* 値の受け取り。ブックマークレット自体は値を持たない（登録は一度きりにするため）。\n   * 受け取り口を3段用意する。どれで受け取ったかは結果画面に必ず出す。\n   *   1. location.hash … 本命。ツールの「フォームを開く」が #gsh=… を付ける\n   *   2. クリップボード … Forms のリダイレクトでハッシュが消えた場合の逃げ道\n   *   3. 貼り付け欄 … それも駄目なら手で貼ってもらう（黙って失敗させない）\n   */\n  function fromBase64Url(s) {\n    var b64 = s.replace(/-/g, '+').replace(/_/g, '/');\n    while (b64.length % 4) b64 += '=';\n    var bin = atob(b64);\n    var bytes = new Uint8Array(bin.length);\n    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);\n    return new TextDecoder('utf-8').decode(bytes);\n  }\n\n  function parsePayload(raw) {\n    if (!raw) return null;\n    try {\n      var json = raw.charAt(0) === '{' ? raw : fromBase64Url(raw);\n      var p = JSON.parse(json);\n      return (p && p.map && p.values) ? p : null;\n    } catch (e) { return null; }\n  }\n\n  function payloadFromHash() {\n    var m = /[#&]gsh=([^&]+)/.exec(location.hash || '');\n    return m ? parsePayload(decodeURIComponent(m[1])) : null;\n  }\n\n  var payload = window.__GSH_PAYLOAD__ || payloadFromHash();\n  var payloadSource = window.__GSH_PAYLOAD__ ? '直接指定' : (payload ? 'リンクの # から' : null);\n\n  var MAP = {}, QUESTIONS = [], VALUES = {};\n\n  /* 設問数は「決め打ち」にできない。\n   * このフォームには条件付きの設問が2つあり（授業のときだけ出る6番と、\n   * 活動主管箇所名がその他のときだけ出る箇所名）、答え方によって 16〜18 問に増減する。\n   * Forms は表示中の設問に番号を振り直すので、表示番号もずれる\n   * （活動主管箇所名は 8/24 は8番、8/25 は9番だった）。\n   * 17問固定にしていたため、正常な状態でも「大学がフォームを変更した」と誤警告していた。 */\n  var COUNT_MIN = null, COUNT_MAX = null;\n  function readExpectedCount(v) {\n    if (v == null) { COUNT_MIN = COUNT_MAX = null; return; }\n    if (typeof v === 'number') { COUNT_MIN = COUNT_MAX = v; return; }\n    COUNT_MIN = typeof v.min === 'number' ? v.min : null;\n    COUNT_MAX = typeof v.max === 'number' ? v.max : null;\n  }\n  /** 想定の設問数を人に見せる形に。範囲なら「16〜18」。 */\n  function expectedCountLabel() {\n    if (COUNT_MIN == null && COUNT_MAX == null) return '不明';\n    if (COUNT_MIN === COUNT_MAX) return String(COUNT_MIN);\n    return COUNT_MIN + '〜' + COUNT_MAX;\n  }\n  function countOutOfRange(n) {\n    if (COUNT_MIN != null && n < COUNT_MIN) return true;\n    if (COUNT_MAX != null && n > COUNT_MAX) return true;\n    return false;\n  }\n\n  function adoptPayload(p, source) {\n    payload = p; payloadSource = source;\n    MAP = p.map || {};\n    QUESTIONS = MAP.questions || [];\n    VALUES = p.values || {};\n    readExpectedCount(MAP.expectedCount);\n  }\n  if (payload) adoptPayload(payload, payloadSource);\n\n  var WAIT = 600;\n\n  var results = [];   // { label, status, detail }\n  function record(label, status, detail) { results.push({ label: label, status: status, detail: detail }); }\n\n  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }\n  function text(n) { return n ? String(n.textContent || '').replace(/\\s+/g, ' ').trim() : ''; }\n\n  // ---------- 見出しの正規化 ----------\n  // 実物の見出しは「1.申請者氏名単一行テキスト.」のように、大学が手で打った連番と\n  // Forms が自動で付ける種別の読み上げ文言が前後に付く。両方落として比較する。\n  var TYPE_SUFFIX = /(単一行テキスト|複数行テキスト|単一選択|複数選択|日付|ファイルのアップロード|評価|ランキング)\\.?$/;\n\n  function normalizeHeading(s) {\n    var t = String(s || '');\n    if (t.normalize) t = t.normalize('NFKC');\n    t = t.replace(/\\(非匿名の質問\\)/g, '').replace(/\\(匿名の質問\\)/g, '');\n    t = t.replace(/\\s+/g, '');\n    t = t.replace(TYPE_SUFFIX, '');\n    t = t.replace(/[.。*＊:：]+$/, '');\n    return t;\n  }\n\n  /** 見出しの先頭連番を取り出す（1始まり）。インデックス照合の検算に使う。 */\n  function leadingNumber(s) {\n    var m = /^(\\d{1,2})[.．]/.exec(String(s || '').replace(/^\\s+/, ''));\n    return m ? Number(m[1]) : null;\n  }\n\n  function stripLeadingNumber(s) {\n    return String(s || '').replace(/^\\d{1,2}[.．]/, '');\n  }\n\n  // ---------- DOM 走査 ----------\n  function questionNodes() {\n    var sels = ['[data-automation-id=\"questionItem\"]', '[role=\"listitem\"]', '.office-form-question'];\n    for (var i = 0; i < sels.length; i++) {\n      var f = document.querySelectorAll(sels[i]);\n      if (f.length) return Array.prototype.slice.call(f);\n    }\n    return [];\n  }\n\n  function headingOf(q) {\n    var c = q.querySelector('[data-automation-id=\"questionTitle\"]')\n      || q.querySelector('[class*=\"questionTitle\"]')\n      || q.querySelector('h1,h2,h3,h4,legend');\n    if (c) return text(c);\n    var clone = q.cloneNode(true);\n    Array.prototype.forEach.call(clone.querySelectorAll('input,textarea,button,select'), function (n) { n.remove(); });\n    return text(clone).slice(0, 160);\n  }\n\n  function ownerOf(el) {\n    return (el && el.closest && el.closest('[data-automation-id=\"questionItem\"],[role=\"listitem\"]')) || el;\n  }\n\n  // ---------- 設問の特定（3段構え）----------\n  function resolve(entry, nodes) {\n    // 1段目: 設問ID。並び順にも文言にも依存しない\n    if (entry.qid) {\n      var byId = document.getElementById('QuestionId_' + entry.qid);\n      if (byId) return { node: ownerOf(byId), how: 'id' };\n    }\n\n    // 2段目: 見出しの正規化一致。複数当たったら黙って先頭を採らずに失敗させる\n    if (entry.matchKey) {\n      var want = normalizeHeading(entry.matchKey);\n      var exact = [], partial = [];\n      nodes.forEach(function (n) {\n        var got = normalizeHeading(stripLeadingNumber(headingOf(n)));\n        if (got === want) exact.push(n);\n        else if (!entry.exactOnly && got.indexOf(want) !== -1) partial.push(n);\n      });\n      if (exact.length === 1) return { node: exact[0], how: 'heading' };\n      if (exact.length === 0 && partial.length === 1) return { node: partial[0], how: 'heading-partial' };\n      if (exact.length > 1 || partial.length > 1) {\n        return { node: null, how: 'ambiguous', reason: '見出しが複数の設問に一致しました' };\n      }\n    }\n\n    // 3段目: 並び順。設問数と先頭連番の両方が期待どおりのときだけ許す。\n    // ここを無条件に使ったのが、今回のズレを誰も気付けなかった原因。\n    if (entry.order != null && nodes[entry.order]) {\n      /* 設問数が範囲内で、かつ先頭番号も期待どおりのときだけ並び順を信じる。\n       * 条件付き設問が出入りすると番号は振り直されるので、先頭番号の検算は\n       * 「たまたま範囲内に収まっただけ」を弾く要になる。ここは緩めない。 */\n      var countOk = !countOutOfRange(nodes.length);\n      var num = leadingNumber(headingOf(nodes[entry.order]));\n      var numOk = num == null || num === entry.order + 1;\n      if (countOk && numOk) return { node: nodes[entry.order], how: 'index' };\n      return {\n        node: null, how: 'index-rejected',\n        reason: '並び順での代用も見送りました（設問数 ' + nodes.length\n          + '、期待 ' + expectedCountLabel() + '／先頭番号 ' + num + '、期待 ' + (entry.order + 1) + '）'\n      };\n    }\n\n    return { node: null, how: 'notfound', reason: '設問が見つかりませんでした' };\n  }\n\n  // ---------- 入力 ----------\n  /** React 管理下の input に値を入れる。ネイティブ setter を経由しないと React が気付かない。 */\n  function setNativeValue(inp, val) {\n    var proto = inp.tagName === 'TEXTAREA' ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;\n    var setter = Object.getOwnPropertyDescriptor(proto, 'value').set;\n    if (setter) setter.call(inp, val); else inp.value = val;\n    ['input', 'change'].forEach(function (t) { inp.dispatchEvent(new Event(t, { bubbles: true })); });\n  }\n\n  function textInputOf(q) {\n    return q.querySelector('input[type=\"text\"],input:not([type=\"radio\"]):not([type=\"checkbox\"]):not([type=\"file\"]),textarea');\n  }\n\n  function fillText(q, val) {\n    var inp = textInputOf(q);\n    if (!inp) return { ok: false, reason: '入力欄が見つかりません' };\n    setNativeValue(inp, val);\n    inp.dispatchEvent(new Event('blur', { bubbles: true }));\n    return { ok: inp.value === val, actual: inp.value };\n  }\n\n  function fillRadio(q, val) {\n    var target = normalizeHeading(val);\n    var opts = Array.prototype.slice.call(q.querySelectorAll('[role=\"radio\"],input[type=\"radio\"]'));\n    var hit = null;\n    for (var i = 0; i < opts.length; i++) {\n      var label = opts[i].getAttribute('aria-label') || text(opts[i].closest('label')) || text(opts[i].parentElement);\n      if (normalizeHeading(label) === target) { hit = opts[i]; break; }\n    }\n    if (!hit) return { ok: false, reason: '選択肢「' + val + '」が見つかりません' };\n    hit.click();\n    var wrap = hit.closest('label,[role=\"radio\"]');\n    if (wrap && wrap !== hit) wrap.click();\n    var checked = q.querySelector('[role=\"radio\"][aria-checked=\"true\"],input[type=\"radio\"]:checked');\n    var actual = checked ? (checked.getAttribute('aria-label') || text(checked.closest('label') || checked.parentElement)) : '';\n    return { ok: normalizeHeading(actual) === target, actual: actual };\n  }\n\n  // ---------- ドロップダウン（8番のみ）----------\n  function dropdownTriggerOf(q) {\n    var cands = q.querySelectorAll('[role=\"combobox\"],[aria-haspopup=\"listbox\"],[class*=\"ms-Dropdown\"]');\n    for (var i = 0; i < cands.length; i++) {\n      if (cands[i].tagName.toLowerCase() !== 'input') return cands[i];\n    }\n    return null;\n  }\n\n  async function closeDropdown(trigger) {\n    [trigger, document.activeElement, document.body].forEach(function (t) {\n      if (!t || !t.dispatchEvent) return;\n      t.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', keyCode: 27, bubbles: true }));\n    });\n    if (trigger && trigger.blur) trigger.blur();\n    await sleep(200);\n    if (trigger && trigger.getAttribute('aria-expanded') === 'true') {\n      document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));\n      document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));\n      await sleep(200);\n    }\n  }\n\n  async function fillDropdown(q, val) {\n    var trigger = dropdownTriggerOf(q);\n    if (!trigger) return { ok: false, reason: 'ドロップダウンが見つかりません' };\n\n    var before = text(trigger);\n    // 開く。Fluent は mousedown で開いて click で閉じる実装があるので、開いた状態を都度確認する\n    trigger.focus();\n    ['pointerdown', 'mousedown', 'mouseup', 'click'].forEach(function (t) {\n      var Ctor = (t.indexOf('pointer') === 0 && window.PointerEvent) ? PointerEvent : MouseEvent;\n      trigger.dispatchEvent(new Ctor(t, { bubbles: true, cancelable: true, button: 0 }));\n    });\n    await sleep(350);\n\n    if (trigger.getAttribute('aria-expanded') !== 'true') {\n      trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', altKey: true, bubbles: true }));\n      await sleep(350);\n    }\n\n    // 選択肢は document.body 直下にポータルされるので、設問の内側を探しても見つからない\n    var owns = trigger.getAttribute('aria-controls') || trigger.getAttribute('aria-owns');\n    var box = (owns && document.getElementById(owns)) || null;\n    if (!box) {\n      var boxes = document.querySelectorAll('[role=\"listbox\"]');\n      box = boxes[boxes.length - 1] || null;\n    }\n    var options = box\n      ? Array.prototype.slice.call(box.querySelectorAll('[role=\"option\"]'))\n      : Array.prototype.slice.call(document.querySelectorAll('[role=\"option\"]'));\n\n    if (!options.length) {\n      await closeDropdown(trigger);\n      return { ok: false, reason: '選択肢を読み取れませんでした' };\n    }\n\n    var target = normalizeHeading(val);\n    var hit = null;\n    for (var i = 0; i < options.length; i++) {\n      var label = options[i].getAttribute('aria-label') || text(options[i]);\n      if (normalizeHeading(label) === target) { hit = options[i]; break; }\n    }\n    if (!hit) {\n      // 開きっぱなしにすると、フォーカスが外れた時点で別の項目が確定してしまう\n      await closeDropdown(trigger);\n      return { ok: false, reason: '選択肢「' + val + '」が一覧にありません（' + options.length + '件中）' };\n    }\n\n    if (hit.scrollIntoView) hit.scrollIntoView({ block: 'nearest' });\n    ['mousedown', 'mouseup', 'click'].forEach(function (t) {\n      hit.dispatchEvent(new MouseEvent(t, { bubbles: true, cancelable: true, button: 0 }));\n    });\n    await sleep(300);\n    await closeDropdown(trigger);\n\n    var after = text(trigger);\n    return {\n      ok: normalizeHeading(after) === target,\n      actual: after,\n      reason: normalizeHeading(after) === target ? null\n        : '選んだつもりが反映されていません（' + before + ' → ' + after + '）'\n    };\n  }\n\n  // ---------- 日付（11/12）----------\n  async function fillDate(q, iso) {\n    var inp = q.querySelector('input');\n    if (!inp) return { ok: false, reason: '日付欄が見つかりません' };\n\n    // 実測: placeholder が「日付を入力してください(yyyy/MM/dd)」。書式は確定している\n    var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(iso));\n    if (!m) return { ok: false, reason: '日付の形式が不正です: ' + iso };\n    var formatted = m[1] + '/' + m[2] + '/' + m[3];\n\n    setNativeValue(inp, formatted);\n    inp.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));\n    inp.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));\n    inp.dispatchEvent(new Event('blur', { bubbles: true }));\n    await sleep(300);\n\n    // ピッカーが開いていたら閉じる。開いたままだと後続の操作を食われる\n    inp.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', keyCode: 27, bubbles: true }));\n    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', keyCode: 27, bubbles: true }));\n    await sleep(150);\n\n    var got = inp.value;\n    // Forms が表示を整形して返すことがあるので、数字の集合で照合する\n    var wantNums = [String(Number(m[1])), String(Number(m[2])), String(Number(m[3]))].sort().join(',');\n    var gotNums = (got.match(/\\d+/g) || []).map(function (n) { return String(Number(n)); }).sort().join(',');\n    if (got && wantNums === gotNums) return { ok: true, actual: got };\n\n    // 受理されなかった。中途半端な文字列を残さない\n    setNativeValue(inp, '');\n    inp.dispatchEvent(new Event('blur', { bubbles: true }));\n    return { ok: false, actual: got, reason: '日付が受理されませんでした。手で入力してください' };\n  }\n\n  // ---------- 読み戻し ----------\n  function readBack(q, type) {\n    if (type === 'radio') {\n      var c = q.querySelector('[role=\"radio\"][aria-checked=\"true\"],input[type=\"radio\"]:checked');\n      return c ? (c.getAttribute('aria-label') || text(c.closest('label') || c.parentElement)) : '';\n    }\n    if (type === 'dropdown') {\n      var t = dropdownTriggerOf(q);\n      return t ? text(t) : '';\n    }\n    var inp = textInputOf(q);\n    return inp ? inp.value : '';\n  }\n\n  // ---------- 値の取り出し ----------\n  function valueOf(source) {\n    if (!source) return null;\n    return source.split('.').reduce(function (o, k) { return (o == null ? undefined : o[k]); }, VALUES);\n  }\n\n  // ---------- 実行 ----------\n  /* このフォームは段階表示（分岐）になっている。\n   * 開いた直後は 1〜5番しか出ておらず、5番に回答すると 6〜8番、\n   * 8番に回答すると以降が現れる。\n   * だから分岐を開く設問に回答したあとは、**設問が実際に増えるまで待つ**必要がある。\n   * 固定の待ち時間だと、描画が遅れたときに以降が全部埋まらない（実際にそうなった）。 */\n  async function waitForMore(before, limitMs) {\n    /* 「増えたら成功」だけだと、既に全問見えている状態（前回の続きから開いた、\n     * 2回目の実行、など）で永久に増えず、正常なのに失敗と判定してしまう。\n     * 想定数に達しているなら、それ以上増えなくても満たされているとみなす。 */\n    function satisfied() {\n      var n = questionNodes().length;\n      return n > before || (COUNT_MIN != null && n >= COUNT_MIN);\n    }\n    var waited = 0;\n    var step = 100;\n    while (waited < (limitMs || 3000)) {\n      if (satisfied()) return true;\n      await sleep(step);\n      waited += step;\n    }\n    return satisfied();\n  }\n\n  var gateFailures = [];   // 開かなかった分岐の設問名\n  var staleFound = false;  // 前回の内容が残っていて上書きできなかった設問があったか\n\n  async function run() {\n    var nodes = questionNodes();\n    if (!nodes.length) {\n      alert('フォームの設問が見つかりませんでした。活動届のフォームのページで実行しているか確認してください。');\n      return;\n    }\n\n    // 選択系を先に処理する。選択で DOM が差し替わることがあり、\n    // 先にテキストを入れておくと参照が古くなるため。\n    var order = { radio: 0, dropdown: 0, date: 1, text: 2, textarea: 2 };\n    var todo = QUESTIONS\n      .filter(function (e) { return e.type !== 'file'; })\n      .map(function (e, i) { return { e: e, i: i }; })\n      .sort(function (a, b) {\n        var d = (order[a.e.type] == null ? 3 : order[a.e.type]) - (order[b.e.type] == null ? 3 : order[b.e.type]);\n        return d !== 0 ? d : a.i - b.i;\n      });\n\n    var resolvedValues = {};   // qid -> 実際に入った値（条件付き設問の判定に使う）\n\n    for (var n = 0; n < todo.length; n++) {\n      var entry = todo[n].e;\n\n      // 条件付き設問。設定値ではなく「実際に入っている値」で判定する。\n      // 8番の選択に失敗したのに9番だけ埋まる、という組み合わせを避けるため。\n      if (entry.condition) {\n        var dep = entry.condition.dependsOn;\n        var depNow = resolvedValues[dep];\n        if (depNow == null) {\n          var depEntry = QUESTIONS.filter(function (x) { return x.qid === dep; })[0];\n          var depNode = depEntry ? resolve(depEntry, questionNodes()).node : null;\n          depNow = depNode ? readBack(depNode, depEntry.type) : '';\n        }\n        var met = String(depNow || '').indexOf(entry.condition.startsWith) === 0;\n        if (!met) {\n          // 触らない。ただし人が入れた値が残っていたら知らせる\n          var cNode = resolve(entry, questionNodes()).node;\n          var leftover = cNode ? readBack(cNode, entry.type) : '';\n          if (leftover) {\n            record(entry.label, 'warn', '条件を満たさないので入力していませんが、「' + leftover + '」が残っています。消してください');\n          } else {\n            record(entry.label, 'skip', '条件を満たさないため入力しません（正常）');\n          }\n          continue;\n        }\n      }\n\n      var val = valueOf(entry.source);\n      if (val == null || val === '') { record(entry.label, 'skip', '値が未設定のため入力しません'); continue; }\n\n      /* 入力する前の値を控える。Forms は最初に開いた事前入力リンクの内容を\n       * 覚えてしまう不具合があり、前回の申請内容が残っていることがある。\n       * 「元から違う値が入っていた」ことを言えるようにしておく。 */\n      var pre = (function () {\n        var n = resolve(entry, questionNodes()).node;\n        return n ? readBack(n, entry.type) : '';\n      })();\n\n      // 選択系のあとは DOM が差し替わっている可能性があるので毎回取り直す\n      var live = questionNodes();\n      var r = resolve(entry, live);\n      if (!r.node) {\n        // 分岐が開いていないなら、その設問はまだ画面に存在しない。原因を取り違えない\n        if (gateFailures.length) {\n          record(entry.label, 'error',\n            '「' + gateFailures.join('」「') + '」に回答できなかったため、この設問がまだ出ていません（未到達）');\n        } else {\n          record(entry.label, 'error', r.reason || '設問を特定できませんでした');\n        }\n        continue;\n      }\n\n      var countBefore = live.length;\n      var out;\n      if (entry.type === 'radio') out = fillRadio(r.node, val);\n      else if (entry.type === 'dropdown') out = await fillDropdown(r.node, val);\n      else if (entry.type === 'date') out = await fillDate(r.node, val);\n      else out = fillText(r.node, entry.numeric ? String(val).replace(/[^\\d]/g, '') : val);\n\n      /* 入れたつもりで終わらせない。必ず読み戻す。\n       *\n       * ただし **書いた直後に読むと、書いた値がそのまま返ってくる**。\n       * React やフォーム側の検証が値を差し戻す場合、その差し戻しは次のタスクで起きるので、\n       * 同期的に読むと「入った」と誤判定する（模擬フォームで実際に取り違えた）。\n       * 一拍おいてから読み直して、居座った値を取りこぼさないようにする。 */\n      await sleep(60);\n      var reread = readBack(r.node, entry.type);\n      /* 比較の相手は「記入直後に入っていた値」。元の val と比べてはいけない。\n       * 日付は 2026-09-01 を渡して 2026/09/01 として入るなど、\n       * 設問の型によって表記が変わるので、val と比べると全部が差し戻し扱いになる。 */\n      var intended = out.actual != null ? out.actual : String(val);\n      var actual = reread !== '' ? reread : intended;\n      if (out.ok && normalizeHeading(actual) !== normalizeHeading(intended)) {\n        out = { ok: false, actual: actual, reason: out.reason };\n      }\n      resolvedValues[entry.qid] = actual;\n\n      if (out.ok) {\n        record(entry.label, r.how === 'id' ? 'ok' : 'ok-fallback', actual\n          + (r.how === 'id' ? '' : '（設問IDで特定できず ' + r.how + ' で代用）'));\n      } else if (pre && normalizeHeading(pre) === normalizeHeading(actual)) {\n        // 入力を試みたのに値が変わらず、しかも元から何か入っていた。\n        // Forms が前回の事前入力を記憶しているときの典型的な症状\n        staleFound = true;\n        record(entry.label, 'error',\n          '前から入っていた「' + pre + '」のままで、変更できませんでした');\n      } else {\n        record(entry.label, 'error', out.reason || ('入力できませんでした（現在: ' + actual + '）'));\n      }\n\n      if (entry.unlocksMore) {\n        if (!out.ok) {\n          // ここで失敗すると、この先の設問は画面に出てこない\n          gateFailures.push(entry.label);\n        } else {\n          // 設問が増えるまで待つ。固定待ちだと描画が遅れたときに以降が全滅する\n          var grew = await waitForMore(countBefore);\n          if (!grew) {\n            gateFailures.push(entry.label);\n            record(entry.label, 'warn',\n              '回答はしましたが、続きの設問が出てきませんでした（' + countBefore + ' 問のまま）');\n          }\n        }\n      } else {\n        await sleep(60);\n      }\n    }\n\n    /* 設問数の照合は「最後」に取る。\n     * 段階表示のせいで開いた直後は5問しかないので、最初に数えると\n     * 毎回「大学がフォームを変更した」と誤警告することになる（実際に出ていた）。 */\n    var finalCount = questionNodes().length;\n    // 範囲を外れたときだけ警告する。範囲内の増減は条件付き設問による正常な変動\n    var countMismatch = countOutOfRange(finalCount) && gateFailures.length === 0;\n    banner(countMismatch, finalCount);\n    console.log('[学傷補・学賠補 自動入力]', results);\n  }\n\n  // ---------- 結果表示 ----------\n  // 件数だけ出しても意味がない。「どの設問に何が入ったか」を見せる。\n  function el(tag, style, txt) {\n    var n = document.createElement(tag);\n    if (style) n.setAttribute('style', style);\n    if (txt != null) n.textContent = txt;\n    return n;\n  }\n\n  function banner(countMismatch, actualCount) {\n    var old = document.getElementById('gsh-filler-banner');\n    if (old) old.remove();\n\n    var errors = results.filter(function (r) { return r.status === 'error' || r.status === 'warn'; });\n    var fallbacks = results.filter(function (r) { return r.status === 'ok-fallback'; });\n    var bad = errors.length > 0 || countMismatch;\n\n    var box = el('div', [\n      'position:fixed', 'top:10px', 'right:10px', 'z-index:2147483647',\n      'max-width:520px', 'max-height:80vh', 'overflow:auto',\n      'background:' + (bad ? '#fff4e5' : '#e8f5e9'), 'color:#111',\n      'border:2px solid ' + (bad ? '#e08600' : '#2e7d32'), 'border-radius:8px', 'padding:12px 14px',\n      'font:13px/1.6 system-ui,sans-serif', 'box-shadow:0 6px 24px rgba(0,0,0,.25)'\n    ].join(';'));\n    box.id = 'gsh-filler-banner';\n\n    box.appendChild(el('div', 'font-weight:700;font-size:14px;margin-bottom:6px',\n      bad ? '⚠ 自動入力しましたが、確認が必要です' : '✅ 自動入力しました'));\n    // どの経路で値を受け取ったかを出す。ハッシュが消えていた場合に気付けるように\n    if (payloadSource) {\n      box.appendChild(el('div', 'font-size:12px;color:#555;margin-bottom:4px',\n        '値の受け取り: ' + payloadSource));\n    }\n\n    /* 前から入っていた値が居座って上書きできなかったとき。\n     * 「入らなかった」だけでは原因が分からないので、まとめて名指しする。 */\n    if (staleFound) {\n      box.appendChild(el('div', 'color:#b00;font-weight:700;margin-bottom:6px',\n        'フォームに前から入っていた内容を、上書きできなかった項目があります。'\n        + '下の一覧で ✖ の付いた設問を、手で直してください。'));\n    }\n\n    if (gateFailures.length) {\n      box.appendChild(el('div', 'color:#b00;font-weight:700;margin-bottom:6px',\n        '「' + gateFailures.join('」「') + '」に回答できなかったため、'\n        + 'その先の設問が画面に出ていません。ここを手で選ぶと残りも入力できるようになります。'));\n    } else if (countMismatch) {\n      box.appendChild(el('div', 'color:#b00;font-weight:700;margin-bottom:6px',\n        'フォームの設問数が ' + actualCount + ' 問で、想定の ' + expectedCountLabel()\n        + ' 問の範囲を外れています。大学がフォームを変更した可能性があります。'));\n    }\n\n    var table = el('table', 'width:100%;border-collapse:collapse;margin-top:4px');\n    results.forEach(function (r) {\n      var tr = el('tr');\n      var mark = { ok: '✅', 'ok-fallback': '⚠', skip: '—', warn: '⚠', error: '✖' }[r.status] || '?';\n      var color = (r.status === 'error') ? '#b00' : (r.status === 'warn' || r.status === 'ok-fallback') ? '#a05000' : '#333';\n      tr.appendChild(el('td', 'vertical-align:top;padding:2px 6px 2px 0', mark));\n      tr.appendChild(el('td', 'vertical-align:top;padding:2px 6px 2px 0;white-space:nowrap;font-weight:600', r.label));\n      tr.appendChild(el('td', 'vertical-align:top;padding:2px 0;color:' + color, r.detail || ''));\n      table.appendChild(tr);\n    });\n    box.appendChild(table);\n\n    if (fallbacks.length) {\n      box.appendChild(el('div', 'margin-top:8px;color:#a05000',\n        '設問IDで特定できなかった項目があります。フォームが変更された可能性があるので、内容をよく確認してください。'));\n    }\n\n    box.appendChild(el('div', 'margin-top:10px;font-weight:700;color:#b00',\n      '送信前に、フォームの内容を必ず自分の目で確認してください。'));\n    box.appendChild(el('div', 'margin-top:4px;color:#555',\n      '参加者名簿の添付と送信は自動化していません。手で行ってください。'));\n\n    var close = el('button', 'margin-top:10px;padding:6px 12px;cursor:pointer', '閉じる');\n    close.onclick = function () { box.remove(); };\n    box.appendChild(close);\n    document.body.appendChild(box);\n  }\n\n  /** ハッシュが無かったときの逃げ道。クリップボード → 貼り付け欄の順に試す。 */\n  async function recoverPayload() {\n    if (navigator.clipboard && navigator.clipboard.readText) {\n      try {\n        var p = parsePayload((await navigator.clipboard.readText() || '').trim());\n        if (p) { adoptPayload(p, 'クリップボードから'); return true; }\n      } catch (e) { /* 許可されなければ貼り付け欄に回す */ }\n    }\n    return await askPaste();\n  }\n\n  function askPaste() {\n    return new Promise(function (resolve) {\n      var wrap = el('div', [\n        'position:fixed', 'inset:20% 10%', 'z-index:2147483647', 'background:#fff', 'color:#111',\n        'border:2px solid #333', 'border-radius:10px', 'padding:16px', 'display:flex',\n        'flex-direction:column', 'gap:10px', 'font:14px/1.6 system-ui,sans-serif',\n        'box-shadow:0 10px 40px rgba(0,0,0,.4)'\n      ].join(';'));\n      wrap.appendChild(el('strong', null, '入力する値が見つかりませんでした'));\n      wrap.appendChild(el('div', 'font-size:13px;color:#555',\n        'ツールの「フォームを開く」から開き直すのが確実です。'\n        + 'すでに値をコピーしてある場合は、下に貼り付けてから「これで入力する」を押してください。'));\n      var ta = document.createElement('textarea');\n      ta.setAttribute('style', 'flex:1;min-height:120px;font:12px ui-monospace,monospace');\n      wrap.appendChild(ta);\n      var row = el('div', 'display:flex;gap:8px');\n      var ok = el('button', 'padding:8px 16px;cursor:pointer', 'これで入力する');\n      var cancel = el('button', 'padding:8px 16px;cursor:pointer', 'やめる');\n      ok.onclick = function () {\n        var p = parsePayload(ta.value.trim());\n        if (!p) { ta.setAttribute('style', ta.getAttribute('style') + ';border:2px solid #b00'); return; }\n        adoptPayload(p, '貼り付けから');\n        wrap.remove();\n        resolve(true);\n      };\n      cancel.onclick = function () { wrap.remove(); resolve(false); };\n      row.appendChild(ok); row.appendChild(cancel);\n      wrap.appendChild(row);\n      document.body.appendChild(wrap);\n      ta.focus();\n    });\n  }\n\n  // 遅延描画された設問も対象にするため、一度最下部まで送ってから戻す\n  (async function () {\n    if (!payload) {\n      var got = await recoverPayload();\n      if (!got) return;\n    }\n    var y0 = window.scrollY;\n    window.scrollTo(0, document.body.scrollHeight);\n    await sleep(WAIT);\n    window.scrollTo(0, 0);\n    await sleep(WAIT);\n    try {\n      await run();\n    } catch (e) {\n      console.error('[学傷補・学賠補 自動入力] 失敗', e);\n      alert('自動入力の途中で問題が起きました: ' + (e && e.message || e));\n    }\n    window.scrollTo(0, y0);\n  })();\n})();\n";
+
+  /** コメントと行頭の余白を落として短くする。文字列リテラルは壊さない。 */
+  function shrink(src) {
+    return src
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .split('\n')
+      .map(function (line) { return line.replace(/^\s+/, ''); })
+      .filter(function (line) { return line !== '' && line.indexOf('//') !== 0; })
+      .join('\n');
+  }
+
+  /** 一度登録すればずっと使えるブックマークレット。値は一切含まない。 */
+  function buildStatic() {
+    return 'javascript:' + encodeURIComponent('(function(){' + shrink(FILLER_SOURCE) + '})();');
+  }
+
+  /** UTF-8 を base64url にする。日本語を含むので btoa に直接渡してはいけない。 */
+  function toBase64Url(str) {
+    var bytes = new TextEncoder().encode(str);
+    var bin = '';
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  /**
+   * ブックマークレットに渡す値を符号化する。
+   * 設問マッピングは filler が使う項目だけに絞る（36択の choices は画面用なので載せない）。
+   */
+  function encodePayload(map, values) {
+    var slim = {
+      formVersion: map.formVersion,
+      expectedCount: map.expectedCount,
+      questions: (map.questions || []).map(function (q) {
+        var o = { qid: q.qid, order: q.order, label: q.label, matchKey: q.matchKey, type: q.type, source: q.source };
+        if (q.exactOnly) o.exactOnly = true;
+        if (q.numeric) o.numeric = true;
+        if (q.condition) o.condition = q.condition;
+        return o;
+      })
+    };
+    return toBase64Url(JSON.stringify({ v: 1, map: slim, values: values }));
+  }
+
+  /** 値を載せた「フォームを開く」リンク。ハッシュ以降はサーバに送られない。 */
+  function buildFormLink(formUrl, map, values) {
+    return formUrl + '#gsh=' + encodePayload(map, values);
+  }
+
+  function sizeInfo(url) {
+    var kb = Math.round(url.length / 1024 * 10) / 10;
+    return {
+      文字数: url.length,
+      サイズ: kb + ' KB',
+      警告: url.length > 60000
+        ? 'ブックマークレットが長すぎます。ブラウザによっては登録できません。'
+        : null
+    };
+  }
+
+  root.Bookmarklet = {
+    buildStatic: buildStatic,
+    encodePayload: encodePayload,
+    buildFormLink: buildFormLink,
+    sizeInfo: sizeInfo
+  };
+})(window.GSH = window.GSH || {});
+
+;
+/* app.js — 画面の制御。状態は Store、名簿生成は Roster、フォーム関連は Bookmarklet/Prefill に任せる。 */
+(function (root) {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var state = root.Store.load();
+
+  // ビルド時に差し込まれる値
+  var BUILD = { version: '1.5.0', builtAt: '2026-08-25 11:46', templateStamp: '2026/3/23' };
+  var FORM_MAP = {"_readme":["フォームの設問と入力値の対応表。コードを触らずにここだけ直せばフォーム改変に追従できる。","","qid       : 設問ID。DOM の id=\"QuestionId_<qid>\" で引ける。設問を作り直さない限り不変なので、","            並び順が変わっても文言が変わってもこれで当たる。第一の特定手段。","matchKey  : 見出しを正規化した文字列。qid で引けなかったときの第二の手段。","exactOnly : true のときは matchKey の部分一致を禁止する。15.活動場所 は 14.活動場所（国内/海外）に","            包含されてしまうので、この2問に必要。","order     : 実測時の並び順。最終手段のインデックス照合と、見出しの先頭連番の検算に使う。","type      : text / textarea / radio / dropdown / date / file。操作方法が種別ごとに違う。","source    : 値の取り出し元。personal=各自、org=団体共通、draft=今回の活動、derived=自動算出。","choices   : フォームが要求する正式文字列。省略も英語部分の欠落も許されない（完全一致が必要）。","condition : 満たすときだけ入力する。dependsOn の『実際に入っている値』で判定すること。","","★ 選択肢の文字列は原文のまま。タイポグラフィ引用符（U+201C/U+201D）や、","  4番だけ『1.』の後に空白がある点まで実測どおり。ここを整形すると一致しなくなる。"],"formVersion":"2026-08-24","probedAt":"2026-08-25","formOrigin":"https://forms.cloud.microsoft","formPath":"/pages/responsepage.aspx","formId":"clGGs4eYOkuJ_5WjW5L0w8vMoAEoHbBGiN-zwPeXqL5UMjBZV0FUVlBWNFRIU0o5RTZLOVFVU0hOTyQlQCN0PWcu","shortUrl":"https://forms.office.com/r/CpCUfPQRA6","expectedCount":{"min":16,"max":18},"dateFormat":"yyyy/MM/dd","_prefill":["prefillPrefix : 事前入力のパラメータ名に付ける接頭辞。'' なら設問IDをそのまま、'r' なら r を前置する。","                両方を同時に送るとパラメータ数もURL長も倍になり、Forms 側の上限に当たって","                途中から無視される。実測で 2641 文字 → 片方だけなら 1386 文字。必ず片方に絞ること。","prefillMaxParams : 一度に載せる設問の上限。0 なら無制限。Forms が先頭 N 問しか処理しない","                   場合に使う。優先度の高い順に N 問だけ載せる。","prefillPriority  : 大きいほど死守する。URL が長すぎるときは小さい順に落とす。","                   長い自由記述は手で書けばよいので低く、選び直しが面倒な選択肢は高くする。"],"prefillPrefix":"","prefillMaxParams":0,"questions":[{"order":0,"qid":"r829848c24e95420e888e243416adbd6e","prefillPriority":90,"label":"申請者氏名","title":"1.申請者氏名単一行テキスト.","matchKey":"申請者氏名","type":"text","source":"personal.氏名"},{"order":1,"qid":"r8201ab260350471fa970a10ddf643342","prefillPriority":90,"label":"申請者メールアドレス","title":"2.申請者メールアドレス Applicant's email address単一行テキスト.","matchKey":"申請者メールアドレスApplicant'semailaddress","type":"text","source":"personal.大学メール"},{"order":2,"qid":"r802a462c85d1468ab474c949cab3c58d","prefillPriority":85,"label":"共有用メールアドレス","title":"3.共有用メールアドレス Email address to share the content with単一行テキスト.","matchKey":"共有用メールアドレスEmailaddresstosharethecontentwith","type":"text","source":"personal.連絡先メール"},{"order":3,"qid":"ra7268c22275a48a0b642fb9044c7026c","prefillPriority":100,"label":"加入を希望する補償制度","title":"4.加入を希望する補償制度 Compensation system you wish to register単一選択.","matchKey":"加入を希望する補償制度Compensationsystemyouwishtoregister","type":"radio","source":"org.加入区分","choices":["1.　学傷補のみ加入  Register only for “Compensation for Injury”","2.　学傷補と学賠補　両方に加入　 Register for both “Compensation for Injury” and “Liability Coverage”"]},{"order":4,"qid":"r08ba9ed20b864472902fbf3d3daf9795","unlocksMore":true,"prefillPriority":95,"label":"活動の種類","title":"5.活動の種類 Type of activity単一選択.","matchKey":"活動の種類Typeofactivity","type":"radio","source":"org.活動区分","choices":["1.授業 Class","2.研究活動 Research Activities","3.インターンシップ Internship","4.ボランティア活動 Volunteer Activities","5.教育実習 Educational Practice","6.学校行事 School events","7.その他 Other"]},{"order":5,"qid":"r85ffd7ec7cc44039b23c0c3cf1ab31b4","prefillPriority":50,"label":"【授業の場合のみ】全員科目登録者か","title":"6.【上記質問で「1.授業」を選択した場合のみ】参加者は全員科目登録者ですか？ [If you selected \"1. Class\" for the above question] Are all participants registered for the course?単一選択.","matchKey":"【上記質問で「1.授業」を選択した場合のみ】参加者は全員科目登録者ですか？[Ifyouselected\"1.Class\"fortheabovequestion]Areallparticipantsregisteredforthecourse","type":"radio","source":"org.全員科目登録者","choices":["はい Yes","いいえ No"],"condition":{"dependsOn":"r08ba9ed20b864472902fbf3d3daf9795","startsWith":"1.授業"},"_note":"5番で「1.授業」を選んだときだけフォームに現れる。それ以外では触らない。"},{"order":6,"qid":"r791bdf527cb045b08eca774ed14eb659","prefillPriority":40,"label":"科目名/行事名/活動名","title":"7.科目名 / 行事名 / 活動名 Name of Subject / Event / Activity複数行テキスト.","matchKey":"科目名/行事名/活動名NameofSubject/Event/Activity","type":"textarea","source":"org.活動名"},{"order":7,"qid":"r524a1902a291405eb84e08daa4fd5458","prefillPriority":20,"label":"活動内容","title":"8.活動内容 Description of Activity複数行テキスト.","matchKey":"活動内容DescriptionofActivity","type":"textarea","source":"draft.活動内容"},{"order":8,"qid":"r055babb062ca4202bb615df4274266a7","unlocksMore":true,"prefillPriority":95,"label":"活動主管箇所名","title":"9.活動主管箇所名 Department responsible for the activity単一選択.","matchKey":"活動主管箇所名Departmentresponsiblefortheactivity","type":"dropdown","source":"org.申請先","choices":["政治経済学部 School of Political Science and Economics","法学部 School of Law","教育学部/教育学研究科 School of Education/Graduate School of Education","商学部/商学研究科 School of Commerce/Graduate School of Commerce","社会科学部/社会科学研究科 School of Social Sciences/Graduate School of Social Sciences","所沢総合事務センター（人科・スポ科　学部/研究科） Administrative Office, Tokorozawa","国際教養学部/国際コミュニケーション研究科 SILS/GSICCS","文学学術院事務所（文構/文/文研）Administrative Office, Faculty of Letters, Arts and Sciences","理工センター教学支援課（基幹・創造・先進理工学部/研究科）Academic and Student Affairs Section, Science and Engineering","政治学研究科 Graduate School of Political Science","経済学研究科 Graduate School of Economics","法学研究科 Graduate School of Law","アジア太平洋研究科 GSAPS","日本語教育研究科 Graduate School of Japanese Applied Linguistics","情報生産システム研究科 Graduate School of Information, Production and Systems","会計研究科 Graduate School of Accountancy","環境・エネルギー研究科 WEEE","経営管理研究科 Graduate School of Business and Finance","日本語教育研究センター Center for Japanese Language","留学センター CIE","平山郁夫記念ボランティアセンター（WAVOC）","競技スポーツセンター Athletic Center","グローバルエデュケーションセンター Global Education Center","教育企画課 Educational Planning Section","Global Citizenship Center","早稲田ポータルオフィス WPO","社会連携課 External Affairs and Fund-Raising Section","キャリアセンターCareer Center","学生生活課 Student Affairs Section","ICC","GSセンターGender and Sexuality Center","国際課 International Office","データ科学センター Center for Data Science","アントレプレナーシップセンター Center for Entrepreneurship","文化企画課 Cultural Planning Section","その他 Other"]},{"order":9,"qid":"r7cadf2f9359849d1aab19fc07494d1ff","prefillPriority":50,"label":"【その他の場合のみ】箇所名","title":"10.【上記質問で「その他」を選択した場合のみ】箇所名を以下に入力してください。 [If you selected \"Other\" for the above question] Please enter the name of the department below.単一行テキスト.","matchKey":"【上記質問で「その他」を選択した場合のみ】箇所名を以下に入力してください。[Ifyouselected\"Other\"fortheabovequestion]Pleaseenterthenameofthedepartmentbelow","type":"text","source":"org.申請先その他","condition":{"dependsOn":"r055babb062ca4202bb615df4274266a7","startsWith":"その他"},"_note":"8番で「その他 Other」を選んだときだけ入力する。それ以外では絶対に触らない。旧ブックマークレットはここに責任者名を書き込んでいた。"},{"order":10,"qid":"rb121068c2b55491787cc7975fb8d428c","prefillPriority":80,"label":"責任者名","title":"11.責任者名 Responsible person's name単一行テキスト.","matchKey":"責任者名Responsibleperson'sname","type":"text","source":"org.責任者名","_note":"旧ブックマークレットはここが空のままだった（1つ手前の9番に書き込んでいたため）。"},{"order":11,"qid":"r2249163124ac486d921ea6cb5f0ba4a3","prefillPriority":88,"label":"活動開始日","title":"12.活動開始日 Activity start date日付.","matchKey":"活動開始日Activitystartdate","type":"date","source":"draft.活動開始日"},{"order":12,"qid":"r2cb2bb95896c4746b78bcb197e33ad44","prefillPriority":88,"label":"活動終了日","title":"13.活動終了日 Activity end date日付.","matchKey":"活動終了日Activityenddate","type":"date","source":"draft.活動終了日"},{"order":13,"qid":"r04a227d9fe5c4dcbb6dbd869521a3f9f","prefillPriority":75,"label":"参加学生数","title":"14.参加学生数 Number of participating students単一行テキスト.","matchKey":"参加学生数Numberofparticipatingstudents","type":"text","numeric":true,"source":"derived.参加学生数"},{"order":14,"qid":"r00b622fab56749a2950854c57e46133f","prefillPriority":95,"label":"活動場所（国内/海外）","title":"15.活動場所（国内/海外）Location of activity (domestic/overseas)単一選択.","matchKey":"活動場所(国内/海外)Locationofactivity(domestic/overseas)","exactOnly":true,"type":"radio","source":"org.既定の国内外","choices":["1.国内 Domestic","2.海外 Overseas"],"_note":"旧ブックマークレットは1つ手前の13番をクリックしようとして、何も起きていなかった。"},{"order":15,"qid":"r45161e19dddf4ea9afca395a0b574454","prefillPriority":30,"label":"活動場所","title":"16.活動場所 Location of activity複数行テキスト.","matchKey":"活動場所Locationofactivity","exactOnly":true,"type":"textarea","source":"draft.活動場所","_note":"matchKey が14番に包含されるので、部分一致を禁止して完全一致のみ許可する。"},{"order":16,"qid":"r4b4e4085572a459989b5f120454cbd90","prefillPriority":0,"label":"参加者名簿","title":"17.参加者名簿 List of participants ※所定書式でご提出ください (非匿名の質問)ファイルのアップロード.","matchKey":"参加者名簿Listofparticipants※所定書式でご提出ください","type":"file","source":null,"_note":"自動添付は未対応。生成した名簿を手で選ぶ。"},{"order":17,"qid":"r1975cc93571f4519b76f6eeaeb7b4a16","prefillPriority":10,"label":"備考","title":"18.備考 Remarks複数行テキスト.","matchKey":"備考Remarks","type":"textarea","source":"draft.備考","_note":"既定は空。自動で何か書き込まない（大学に届く文面を勝手に作らない）。"}]};
+  var TEMPLATE_B64 = "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";
+
+  function templateBytes() {
+    var bin = atob(TEMPLATE_B64);
+    var out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  function activeMap() {
+    return (state.formMap && state.formMap.questions) || FORM_MAP.questions;
+  }
+
+  function entryBySource(source) {
+    return activeMap().filter(function (q) { return q.source === source; })[0] || null;
+  }
+
+  function choicesFor(source) {
+    var e = entryBySource(source);
+    return (e && e.choices) || null;
+  }
+
+  /* 設定値をフォームの正式文字列に揃える。
+   * 以前は「学生生活課」のような短い呼び名で持っていたが、フォームが要求するのは
+   * 「学生生活課 Student Affairs Section」。事前入力は完全一致でないと通らない。
+   * 保存済みの短い値は、選択肢の中から部分一致で一意に決まるものへ読み替える。
+   * 一意に決まらなければ空にして、利用者に選び直してもらう。 */
+  function migrateChoiceValues() {
+    var changed = [];
+    ['org.加入区分', 'org.活動区分', 'org.申請先', 'org.既定の国内外'].forEach(function (source) {
+      var choices = choicesFor(source);
+      if (!choices) return;
+      var parts = source.split('.');
+      var cur = state[parts[0]][parts[1]];
+      if (!cur || choices.indexOf(cur) !== -1) return;   // 未設定か、既に正式文字列
+
+      var hits = choices.filter(function (c) { return c.indexOf(cur) !== -1; });
+      state[parts[0]][parts[1]] = hits.length === 1 ? hits[0] : '';
+      changed.push(parts[1] + ': 「' + cur + '」→ ' + (hits.length === 1 ? '「' + hits[0] + '」' : '（選び直してください）'));
+    });
+    if (changed.length) persist();
+    return changed;
+  }
+
+  function persist() {
+    var r = root.Store.save(state);
+    if (!r.ok) setMsg($('io-msg'), r.error, false);
+  }
+
+  function setMsg(node, text, ok) {
+    node.textContent = text || '';
+    node.className = 'msg' + (text ? (ok ? ' ok' : ' ng') : '');
+  }
+
+  // ---- 双方向バインド ------------------------------------------------
+  var FIELDS = [
+    ['p-name', 'personal', '氏名'], ['p-kana', 'personal', 'カナ氏名'], ['p-sid', 'personal', '学籍番号'],
+    ['p-mail1', 'personal', '大学メール'], ['p-mail2', 'personal', '連絡先メール'],
+    ['o-org', 'org', '団体名'], ['o-act', 'org', '活動名'], ['o-resp', 'org', '責任者名'],
+    ['o-ins', 'org', '加入区分'], ['o-kind', 'org', '活動区分'],
+    ['o-allreg', 'org', '全員科目登録者'], ['o-window', 'org', '申請先'],
+    ['o-window-other', 'org', '申請先その他'],
+    ['o-place', 'org', '既定の活動場所'], ['o-area', 'org', '既定の国内外'],
+    ['a-content', 'draft', '活動内容'], ['a-place', 'draft', '活動場所'],
+    ['a-start', 'draft', '活動開始日'], ['a-end', 'draft', '活動終了日'],
+    ['a-remarks', 'draft', '備考']
+  ];
+
+  /* 選択式の項目に、フォームの選択肢をそのまま並べる。
+   * 自由入力のままだと表記ゆれで一致しなくなるので、選ばせるのが確実。 */
+  var SELECTS = [
+    ['o-ins', 'org.加入区分'],
+    ['o-kind', 'org.活動区分'],
+    ['o-allreg', 'org.全員科目登録者'],
+    ['o-window', 'org.申請先'],
+    ['o-area', 'org.既定の国内外']
+  ];
+
+  function populateSelects() {
+    SELECTS.forEach(function (s) {
+      var node = $(s[0]);
+      var choices = choicesFor(s[1]);
+      node.textContent = '';
+      if (!choices) {
+        // 選択肢が未取得のときは自由入力に退避する（フォーム未調査の状態）
+        node.appendChild(new Option('（選択肢が未取得です）', ''));
+        return;
+      }
+      node.appendChild(new Option('選択してください', ''));
+      choices.forEach(function (c) { node.appendChild(new Option(c, c)); });
+    });
+  }
+
+  function bindFields() {
+    FIELDS.forEach(function (f) {
+      var node = $(f[0]);
+      node.value = state[f[1]][f[2]] || '';
+      node.addEventListener('input', function () {
+        state[f[1]][f[2]] = node.value;
+        if (f[1] === 'personal') { state.personal.設定日時 = state.personal.設定日時 || new Date().toISOString(); }
+        persist();
+        refresh();
+      });
+    });
+  }
+
+  // ---- メンバー辞書 --------------------------------------------------
+  function renderMembers() {
+    var box = $('member-list');
+    box.textContent = '';
+    var filter = $('m-filter').value.trim();
+    var selected = new Set(state.draft.参加者 || []);
+
+    state.members
+      .filter(function (m) {
+        if (!filter) return true;
+        return (m.表示名 + m.カナ氏名 + m.学籍番号).indexOf(filter) !== -1;
+      })
+      .forEach(function (m) {
+        var problems = root.Roster.validateMember(m);
+        var row = document.createElement('div');
+        row.className = 'member' + (problems.length ? ' bad' : '');
+        if (problems.length) row.title = problems.join('\n');
+
+        var lab = document.createElement('label');
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = selected.has(m.id);
+        cb.addEventListener('change', function () {
+          var s = new Set(state.draft.参加者 || []);
+          if (cb.checked) s.add(m.id); else s.delete(m.id);
+          state.draft.参加者 = Array.from(s);
+          persist();
+          refresh();
+        });
+
+        var who = document.createElement('span');
+        who.className = 'who';
+        var b = document.createElement('b');
+        b.textContent = m.表示名 || m.カナ氏名;
+        var s2 = document.createElement('span');
+        s2.textContent = m.学籍番号 + ' / ' + m.カナ氏名 + (problems.length ? '  ⚠ 書式要確認' : '');
+        who.appendChild(b); who.appendChild(s2);
+
+        lab.appendChild(cb); lab.appendChild(who);
+
+        var del = document.createElement('button');
+        del.className = 'del';
+        del.textContent = '✕';
+        del.title = 'このメンバーを削除';
+        del.addEventListener('click', function () {
+          if (!confirm(m.表示名 + ' を辞書から削除します。よろしいですか？')) return;
+          state.members = state.members.filter(function (x) { return x.id !== m.id; });
+          state.draft.参加者 = (state.draft.参加者 || []).filter(function (id) { return id !== m.id; });
+          persist(); refresh();
+        });
+
+        row.appendChild(lab); row.appendChild(del);
+        box.appendChild(row);
+      });
+
+    $('m-count').textContent = '登録 ' + state.members.length + ' 名 / 選択 ' + (state.draft.参加者 || []).length + ' 名';
+  }
+
+  function addMember(sid, kana, name) {
+    sid = String(sid || '').trim().split('-')[0];   // ハイフン以降は不要
+    kana = String(kana || '').trim();
+    name = String(name || '').trim() || kana;
+    if (!sid || !kana) { alert('学籍番号とカナ氏名は必須です。'); return false; }
+    if (state.members.some(function (m) { return m.学籍番号 === sid; })) {
+      alert('学籍番号 ' + sid + ' は既に登録されています。');
+      return false;
+    }
+    state.members.push({ id: root.Store.newId(), 学籍番号: sid, カナ氏名: kana, 表示名: name });
+    persist();
+    return true;
+  }
+
+  // ---- プリセット ----------------------------------------------------
+  function renderPresets() {
+    var sel = $('preset-sel');
+    var keep = sel.value;
+    sel.textContent = '';
+    var head = document.createElement('option');
+    head.value = ''; head.textContent = 'プリセットを選ぶ…';
+    sel.appendChild(head);
+    state.presets.forEach(function (p) {
+      var o = document.createElement('option');
+      o.value = p.id; o.textContent = p.name;
+      sel.appendChild(o);
+    });
+    sel.value = keep;
+  }
+
+  // ---- 集計 ----------------------------------------------------------
+  function selectedMembers() {
+    var order = {};
+    state.members.forEach(function (m, i) { order[m.id] = i; });
+    return (state.draft.参加者 || [])
+      .map(function (id) { return state.members.find(function (m) { return m.id === id; }); })
+      .filter(Boolean)
+      .sort(function (a, b) { return order[a.id] - order[b.id]; });
+  }
+
+  function collectIssues() {
+    var out = [];
+    if (!root.Store.isPersonalReady(state)) out.push('「1. あなたの情報」の氏名と大学のメールアドレスを入れてください。');
+    var members = selectedMembers();
+    if (!members.length) out.push('参加者が選ばれていません。「3. メンバー辞書」でチェックを入れてください。');
+    if (members.length > root.Roster.MAX_MEMBERS) {
+      out.push('参加者が ' + members.length + ' 名です。このテンプレートは ' + root.Roster.MAX_MEMBERS + ' 名までです。');
+    }
+    members.forEach(function (m) {
+      root.Roster.validateMember(m).forEach(function (p) { out.push(m.表示名 + '：' + p); });
+    });
+    if (!state.draft.活動開始日) out.push('活動開始日を入れてください。');
+    if (!state.draft.活動終了日) out.push('活動終了日を入れてください。');
+    if (state.draft.活動開始日 && state.draft.活動終了日 && state.draft.活動終了日 < state.draft.活動開始日) {
+      out.push('活動終了日が活動開始日より前になっています。');
+    }
+    if (!(state.draft.活動場所 || state.org.既定の活動場所)) out.push('活動場所を入れてください。');
+    return out;
+  }
+
+  /* filler / prefill に渡す値。form-map.json の source 表記
+   * （personal.* / org.* / draft.* / derived.*）とそのまま対応させる。
+   * 以前は settings.* に詰め替えていたが、対応表が二重管理になるのでやめた。 */
+  function fillerValues() {
+    return {
+      personal: state.personal,
+      org: state.org,
+      draft: Object.assign({}, state.draft, {
+        活動場所: state.draft.活動場所 || state.org.既定の活動場所
+      }),
+      derived: {
+        参加学生数: String(selectedMembers().length)
+      }
+    };
+  }
+
+  // ---- 出力 ----------------------------------------------------------
+  function download(bytes, filename, mime) {
+    var blob = new Blob([bytes], { type: mime });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+  }
+
+  async function makeRoster() {
+    var issues = collectIssues();
+    if (issues.length) {
+      setMsg($('roster-msg'), '入力に不足があります。上の一覧を確認してください。', false);
+      return;
+    }
+    setMsg($('roster-msg'), '作成中…', true);
+    try {
+      var v = fillerValues();
+      var bytes = await root.Roster.generate(templateBytes(), {
+        申請者氏名: v.personal.氏名,
+        活動名: v.org.活動名 || v.draft.活動内容,
+        責任者名: v.org.責任者名,
+        活動場所: v.draft.活動場所,
+        活動開始日: v.draft.活動開始日,
+        活動終了日: v.draft.活動終了日,
+        members: selectedMembers()
+      });
+      // File System Access API で保存を試す（Edge/Chrome で選択済みのフォルダがあれば使う）
+      var saveResult = null;
+      try {
+        saveResult = await root.SaveTarget.saveRoster(bytes);
+      } catch (e) {
+        // 保存エラーは警告するが、従来の download にフォールバックして進める
+        setMsg($('roster-msg'), '警告: フォルダへの保存に失敗しました。ブラウザの自動ダウンロード機能で保存します。（詳細: ' + (e && e.message || e) + '）', false);
+      }
+      if (!saveResult) {
+        // フォルダ未選択 or API 非対応 → 従来の download を使う（固定ファイル名）
+        download(bytes, root.SaveTarget.ORIGINAL_FILENAME, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      }
+      setMsg($('roster-msg'), '作成しました（' + selectedMembers().length + ' 名）。提出後、不要になったら削除してください。', true);
+    } catch (e) {
+      setMsg($('roster-msg'), '失敗しました：' + (e && e.message || e), false);
+      console.error(e);
+    }
+  }
+
+  /* ブックマークレットはロジックだけ。値は「フォームを開く」リンクの # で渡す。
+   * これで、設定を変えても登録し直しが要らなくなる（以前は毎回必要だった）。 */
+  function refreshBookmarklet() {
+    var url = root.Bookmarklet.buildStatic();
+    var info = root.Bookmarklet.sizeInfo(url);
+    $('bm-link').href = url;
+    $('bm-text').value = url;
+    $('bm-size').textContent = info.サイズ + '・一度登録すればずっと同じ';
+    $('bm-warn').textContent = info.警告 || '';
+  }
+
+  function formBaseUrl(src) {
+    // 事前入力 URL は「?id=」を含む完全な URL から組む。短縮 URL では作れない
+    return src.responseUrl
+      || (src.formOrigin && src.formPath && src.formId
+        ? src.formOrigin + src.formPath + '?id=' + src.formId : null);
+  }
+
+  /* 設問1つに入れる生の値。書式の調整はここではやらない。
+   * 事前入力（yyyy-MM-dd＋引用符）とブックマークレット（yyyy/MM/dd）で
+   * 要求される書式が違うので、それぞれの側で整える。
+   * 以前ここで日付をスラッシュに変換していたため、事前入力側が壊れていた。 */
+  function valueForQuestion(q, v) {
+    if (!q.source) return '';
+    var val = q.source.split('.').reduce(function (o, k) { return o == null ? undefined : o[k]; }, v);
+    return val == null ? '' : String(val);
+  }
+
+  function refreshPrefill() {
+    var block = $('prefill-block');
+    var src = state.formMap || FORM_MAP;
+    var map = src.questions || [];
+    var formUrl = formBaseUrl(src);
+
+    if (!formUrl || !map.some(function (q) { return q.qid; })) {
+      block.classList.add('hidden');
+      return;
+    }
+    block.classList.remove('hidden');
+
+    var v = fillerValues();
+    var payload = root.Bookmarklet.encodePayload(src, v);
+
+    /* リンクは事前入力クエリだけ。ハッシュ（#gsh=）は載せない。
+     *
+     * AADSTS90015（URL が長すぎる）が出たとき内訳を測ったら、
+     * 全体 7,089文字のうち **5,652文字（80%）がハッシュ**で、
+     * 事前入力クエリは 1,292文字だった。膨らませていたのはハッシュのほうだった。
+     * ハッシュを外すだけで 1,437文字に収まる。
+     *
+     * ブックマークレットへは、リンクを押したときにクリップボード経由で渡す。
+     * filler は ハッシュ → クリップボード → 貼り付け欄 の順に値を探す。 */
+    var r = root.Prefill.build(formUrl, map, function (q) { return valueForQuestion(q, v); }, {
+      prefix: src.prefillPrefix || '',
+      /* 短縮時の目安。1,050 にすると長い自由記述3つ（活動内容・活動場所・科目名）だけが
+       * 外れて 1,005 文字に収まり、氏名やメールのような短い項目は残る。
+       * これ以上下げると短い項目まで削れて損なので、下げすぎない。 */
+      maxUrl: state.shortenUrl ? 1050 : root.Prefill.MAX_URL
+    });
+    var link = r.url || formUrl;
+    $('prefill-link').href = link;
+    $('prefill-count').textContent = 'URL ' + link.length.toLocaleString() + ' 文字 / '
+      + r.included.length + ' 問';
+
+    $('prefill-link').onclick = function () {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(payload).catch(function () { /* 失敗しても開く */ });
+        }
+      } catch (e) { /* 開く動作は妨げない */ }
+    };
+
+    var note = $('prefill-note');
+    note.textContent = '';
+    var lead = 'このフォームは、5番に答えると6〜8番、8番に答えるとその先が出てくる段階表示です。';
+    note.appendChild(document.createTextNode(lead));
+    if (r.skipped.length) {
+      note.appendChild(document.createTextNode(' 次の項目はリンクに載せていません（③で埋まります）：'));
+      var ul = document.createElement('ul');
+      r.skipped.forEach(function (s) {
+        var li = document.createElement('li');
+        li.textContent = s.label + '（' + s.reason + '）';
+        ul.appendChild(li);
+      });
+      note.appendChild(ul);
+    }
+  }
+
+  function refreshIssues() {
+    var box = $('issues');
+    var issues = collectIssues();
+    box.textContent = '';
+    if (!issues.length) { box.classList.add('hidden'); return; }
+    box.classList.remove('hidden');
+    var h = document.createElement('strong');
+    h.textContent = '入力を確認してください';
+    var ul = document.createElement('ul');
+    issues.forEach(function (t) {
+      var li = document.createElement('li');
+      li.textContent = t;
+      ul.appendChild(li);
+    });
+    box.appendChild(h); box.appendChild(ul);
+  }
+
+  /* フォームに入る内容を、設問見出し付きの一覧で見せる。
+   * フォームを17問スクロールして目視するより、ここで1画面で確認するほうが確実。 */
+  function refreshReview() {
+    var box = $('review');
+    box.textContent = '';
+    var v = fillerValues();
+    var table = document.createElement('table');
+    table.className = 'review';
+
+    activeMap().forEach(function (q) {
+      var tr = document.createElement('tr');
+      var name = document.createElement('td');
+      name.textContent = q.label;
+      var val = document.createElement('td');
+
+      if (q.type === 'file') {
+        val.textContent = '（手で添付します）';
+        val.className = 'muted';
+      } else if (q.condition) {
+        var dep = activeMap().filter(function (x) { return x.qid === q.condition.dependsOn; })[0];
+        var depVal = dep ? String(q.source.split('.').reduce(function (o, k) { return o == null ? undefined : o[k]; }, v) || '') : '';
+        var depNow = dep ? String(dep.source.split('.').reduce(function (o, k) { return o == null ? undefined : o[k]; }, v) || '') : '';
+        if (depNow.indexOf(q.condition.startsWith) === 0) {
+          val.textContent = depVal || '（未入力）';
+          if (!depVal) val.className = 'warn-cell';
+        } else {
+          val.textContent = '（対象外なので入力しません）';
+          val.className = 'muted';
+        }
+      } else {
+        var raw = q.source
+          ? q.source.split('.').reduce(function (o, k) { return o == null ? undefined : o[k]; }, v)
+          : null;
+        if (raw == null || raw === '') {
+          val.textContent = '（未入力・そのままにします）';
+          val.className = 'muted';
+        } else {
+          val.textContent = String(raw);
+        }
+      }
+      tr.appendChild(name); tr.appendChild(val);
+      table.appendChild(tr);
+    });
+    box.appendChild(table);
+  }
+
+  function refreshCountBadge() {
+    var n = selectedMembers().length;
+    var node = $('count-badge');
+    if (!n) { node.textContent = ''; return; }
+    node.textContent = '参加学生数は ' + n + ' 名として自動で入ります（名簿の行数と同じ）。';
+  }
+
+  function refresh() {
+    var ready = root.Store.isPersonalReady(state);
+    $('gate').classList.toggle('hidden', ready);
+    $('btn-roster').disabled = !ready;
+    /* フォームと同じ条件でだけ欄を出す。条件を満たさない設問はフォームにも現れないので、
+     * ここで値を持たせても使い道がなく、選ばせると誤った申請のもとになる。 */
+    // 申請先が「その他」のときだけ、箇所名の入力欄を出す
+    $('o-window-other-wrap').classList.toggle('hidden', String(state.org.申請先 || '').indexOf('その他') !== 0);
+    // 活動の種類が「1.授業」のときだけ、全員科目登録者かの欄を出す
+    $('o-allreg-wrap').classList.toggle('hidden', String(state.org.活動区分 || '').indexOf('1.授業') !== 0);
+    renderMembers();
+    refreshCountBadge();
+    refreshIssues();
+    refreshReview();
+    refreshBookmarklet();
+    refreshPrefill();
+  }
+
+  // ---- 設問マッピングの取り込み --------------------------------------
+  function applyProbe(json) {
+    var probe = JSON.parse(json);
+    var api = probe.設問;
+    if (!Array.isArray(api) || !api.length) {
+      throw new Error('設問一覧が入っていません。調査ブックマークレットの出力をそのまま貼り付けてください。');
+    }
+    // 既存マップの label/source を保ちつつ、見出しと設問 ID を埋める
+    var base = (state.formMap && state.formMap.questions) || FORM_MAP.questions;
+    var used = {};
+    var questions = base.map(function (entry) {
+      var hit = api.find(function (q) {
+        if (used[q.id]) return false;
+        if (entry.match && q.title.indexOf(entry.match) !== -1) return true;
+        return entry.fallbackIndex != null && q.order === entry.fallbackIndex;
+      });
+      if (!hit) return Object.assign({}, entry);
+      used[hit.id] = true;
+      return Object.assign({}, entry, { match: hit.title, qid: hit.id, choices: hit.choices || null });
+    });
+
+    state.formMap = {
+      formVersion: probe.収集日時 || new Date().toISOString(),
+      responseUrl: probe.ページURL || null,
+      host: probe.ホスト || null,
+      questions: questions,
+      未対応の設問: api.filter(function (q) { return !used[q.id]; }).map(function (q) {
+        return { order: q.order, title: q.title, type: q.type };
+      })
+    };
+    persist();
+    return state.formMap;
+  }
+
+  // ---- 保存先フォルダの状態管理 -----------------------------------------
+  async function updateSaveTargetStatus() {
+    var statusEl = $('save-target-status');
+    var pickBtn = $('btn-pick-folder');
+    if (!root.SaveTarget.isSupported()) {
+      $('save-target-section').style.display = 'none';
+      return;
+    }
+    var handle = await root.SaveTarget.getSavedFolderHandle();
+    if (handle) {
+      statusEl.textContent = '✓ フォルダが選択されています';
+      statusEl.style.color = '#2e7d32';
+    } else {
+      statusEl.textContent = '未選択';
+      statusEl.style.color = '#666';
+    }
+  }
+
+  // ---- 起動 ----------------------------------------------------------
+  function wire() {
+    $('version').textContent = 'バージョン ' + BUILD.version + '（ビルド ' + BUILD.builtAt + ' / 名簿テンプレ ' + BUILD.templateStamp + '）';
+
+    $('m-add').addEventListener('click', function () {
+      if (addMember($('m-sid').value, $('m-kana').value, $('m-name').value)) {
+        $('m-sid').value = ''; $('m-kana').value = ''; $('m-name').value = '';
+        refresh();
+      }
+    });
+    $('m-add-self').addEventListener('click', function () {
+      if (addMember(state.personal.学籍番号, state.personal.カナ氏名, state.personal.氏名)) refresh();
+    });
+    $('m-filter').addEventListener('input', renderMembers);
+    $('m-all').addEventListener('click', function () {
+      state.draft.参加者 = state.members.map(function (m) { return m.id; });
+      persist(); refresh();
+    });
+    $('m-none').addEventListener('click', function () {
+      state.draft.参加者 = []; persist(); refresh();
+    });
+
+    $('preset-sel').addEventListener('change', function () {
+      var p = state.presets.find(function (x) { return x.id === $('preset-sel').value; });
+      if (!p) return;
+      state.draft.活動内容 = p.活動内容 || '';
+      state.draft.活動場所 = p.活動場所 || '';
+      $('a-content').value = state.draft.活動内容;
+      $('a-place').value = state.draft.活動場所;
+      persist(); refresh();
+    });
+    $('preset-save').addEventListener('click', function () {
+      var name = prompt('プリセット名を入力してください', state.draft.活動内容.slice(0, 20));
+      if (!name) return;
+      state.presets.push({
+        id: root.Store.newId(), name: name,
+        活動内容: state.draft.活動内容, 活動場所: state.draft.活動場所
+      });
+      persist(); renderPresets();
+    });
+    $('preset-del').addEventListener('click', function () {
+      var id = $('preset-sel').value;
+      if (!id) return;
+      state.presets = state.presets.filter(function (p) { return p.id !== id; });
+      persist(); renderPresets();
+    });
+
+    $('shorten-url').checked = !!state.shortenUrl;
+    $('shorten-url').addEventListener('change', function () {
+      state.shortenUrl = $('shorten-url').checked;
+      persist(); refresh();
+    });
+
+    $('btn-roster').addEventListener('click', makeRoster);
+
+    $('btn-pick-folder').addEventListener('click', function () {
+      root.SaveTarget.pickFolder().then(function (handle) {
+        if (handle) {
+          setMsg($('roster-msg'), 'フォルダを選択しました。これ以降、名簿は同名ファイルがあれば自動的に old/ に移してから保存します。', true);
+          updateSaveTargetStatus();
+        } else {
+          setMsg($('roster-msg'), 'キャンセルされました。', false);
+        }
+      }).catch(function (e) {
+        setMsg($('roster-msg'), 'フォルダ選択に失敗しました：' + (e && e.message || e), false);
+      });
+    });
+
+    $('bm-copy').addEventListener('click', function () {
+      var ta = $('bm-text');
+      ta.select();
+      navigator.clipboard.writeText(ta.value).then(
+        function () { setMsg($('roster-msg'), '', true); alert('コピーしました。ブックマークを新規作成し、URL 欄に貼り付けてください。'); },
+        function () { alert('コピーできませんでした。テキストを手で選択してコピーしてください。'); }
+      );
+    });
+
+    // データ入出力
+    var sel = $('exp-mode');
+    Object.keys(root.Store.MODES).forEach(function (k) {
+      var o = document.createElement('option');
+      o.value = k; o.textContent = root.Store.MODES[k].label;
+      sel.appendChild(o);
+    });
+    $('btn-export').addEventListener('click', function () {
+      var mode = sel.value;
+      var json = root.Store.exportData(state, mode);
+      if (mode !== 'org' && !confirm('このファイルには個人情報が含まれます。共有範囲に注意してください。書き出しますか？')) return;
+      download(new TextEncoder().encode(json), '学傷補設定_' + (state.org.団体名 || '設定') + '_' + root.Roster.todayIso().replace(/-/g, '') + '.json', 'application/json');
+      setMsg($('io-msg'), '書き出しました。', true);
+    });
+    $('imp-file').addEventListener('change', function (ev) {
+      var f = ev.target.files && ev.target.files[0];
+      if (!f) return;
+      f.text().then(function (t) {
+        try {
+          var r = root.Store.importData(state, t);
+          state = r.data; persist();
+          bindFields(); renderPresets(); refresh();
+          setMsg($('io-msg'), r.report.join(' / '), true);
+        } catch (e) {
+          setMsg($('io-msg'), '読み込めませんでした：' + (e && e.message || e), false);
+        }
+        ev.target.value = '';
+      });
+    });
+    $('btn-clear').addEventListener('click', function () {
+      if (!confirm('この端末に保存した設定・メンバー辞書をすべて削除します。元に戻せません。よろしいですか？')) return;
+      root.Store.clear();
+      state = root.Store.blank();
+      bindFields(); renderPresets(); refresh();
+      setMsg($('io-msg'), '削除しました。', true);
+    });
+
+    $('probe-link').href = 'javascript:' + encodeURIComponent("(function(){(function () {\r\n'use strict';\r\nvar WAIT = 700;\r\nfunction el(tag, style, txt) {\r\nvar n = document.createElement(tag);\r\nif (style) n.setAttribute('style', style);\r\nif (txt != null) n.textContent = txt;\r\nreturn n;\r\n}\r\nfunction text(node) {\r\nreturn node ? String(node.textContent || '').replace(/\\s+/g, ' ').trim() : '';\r\n}\r\nfunction rawText(node) {\r\nreturn node ? String(node.textContent || '') : '';\r\n}\r\nfunction sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }\r\nfunction attrs(node, names) {\r\nvar out = {};\r\nif (!node) return out;\r\nnames.forEach(function (n) {\r\nvar v = node.getAttribute ? node.getAttribute(n) : null;\r\nif (v != null) out[n] = v;\r\n});\r\nreturn out;\r\n}\r\nfunction escapeNonAscii(s) {\r\nreturn String(s).replace(/[^\\x20-\\x7E]/g, function (c) {\r\nreturn '\\\\u' + c.charCodeAt(0).toString(16).padStart(4, '0');\r\n});\r\n}\r\nfunction skeleton(node, depth) {\r\nif (!node || depth < 0) return null;\r\nvar rec = {\r\ntag: node.tagName ? node.tagName.toLowerCase() : String(node.nodeName),\r\nrole: node.getAttribute ? node.getAttribute('role') : null,\r\nautomationId: node.getAttribute ? node.getAttribute('data-automation-id') : null,\r\nid: node.id || null,\r\ncls: node.className && typeof node.className === 'string' ? node.className.slice(0, 60) : null\r\n};\r\nObject.keys(rec).forEach(function (k) { if (rec[k] == null) delete rec[k]; });\r\nvar kids = node.children ? Array.prototype.slice.call(node.children, 0, 8) : [];\r\nif (kids.length && depth > 0) {\r\nrec.children = kids.map(function (c) { return skeleton(c, depth - 1); });\r\n}\r\nreturn rec;\r\n}\r\nfunction questionNodes() {\r\nvar sels = ['[data-automation-id=\"questionItem\"]', '[role=\"listitem\"]', '.office-form-question'];\r\nfor (var i = 0; i < sels.length; i++) {\r\nvar f = document.querySelectorAll(sels[i]);\r\nif (f.length) return { selector: sels[i], nodes: Array.prototype.slice.call(f) };\r\n}\r\nreturn { selector: null, nodes: [] };\r\n}\r\nfunction headingOf(q) {\r\nvar c = q.querySelector('[data-automation-id=\"questionTitle\"]')\r\n|| q.querySelector('[class*=\"questionTitle\"]')\r\n|| q.querySelector('h1,h2,h3,h4,legend');\r\nif (c) return text(c);\r\nvar clone = q.cloneNode(true);\r\nArray.prototype.forEach.call(clone.querySelectorAll('input,textarea,button,select'), function (n) { n.remove(); });\r\nreturn text(clone).slice(0, 160);\r\n}\r\nfunction dateField(q) {\r\nvar cands = q.querySelectorAll('input');\r\nfor (var i = 0; i < cands.length; i++) {\r\nvar n = cands[i];\r\nvar ph = n.getAttribute('placeholder') || '';\r\nvar al = n.getAttribute('aria-label') || '';\r\nvar cls = String(n.className || '');\r\nif (/yyyy|YYYY|年.*月.*日/.test(ph) || /日付|Date/.test(al) || /ms-TextField/.test(cls)) return n;\r\n}\r\nreturn null;\r\n}\r\nfunction typeOf(q) {\r\nif (q.querySelector('input[type=\"file\"]')) return 'file';\r\nif (q.querySelector('[role=\"radio\"],input[type=\"radio\"]')) return 'radio';\r\nif (q.querySelector('[role=\"checkbox\"],input[type=\"checkbox\"]')) return 'checkbox';\r\nif (dateField(q)) return 'date';            // ★ dropdown より先に判定する\r\nif (dropdownTrigger(q)) return 'dropdown';\r\nif (q.querySelector('textarea')) return 'textarea';\r\nif (q.querySelector('input')) return 'text';\r\nreturn 'unknown';\r\n}\r\nfunction dropdownTrigger(q) {\r\nvar cands = q.querySelectorAll('[role=\"combobox\"],[aria-haspopup=\"listbox\"],[class*=\"ms-Dropdown\"]');\r\nfor (var i = 0; i < cands.length; i++) {\r\nif (cands[i].tagName.toLowerCase() !== 'input') return cands[i];\r\n}\r\nreturn null;\r\n}\r\nfunction exactChoiceText(n) {\r\nvar v = n.getAttribute('value');\r\nif (v) return { source: 'value', value: v };\r\nvar av = n.closest && n.closest('[data-automation-value]');\r\nif (av) {\r\nvar a = av.getAttribute('data-automation-value');\r\nif (a) return { source: 'data-automation-value', value: a };\r\n}\r\nvar lb = n.getAttribute('aria-labelledby');\r\nif (lb) {\r\nvar parts = [];\r\nlb.split(/\\s+/).forEach(function (id) {\r\nvar t = document.getElementById(id);\r\nif (t) parts.push(rawText(t));\r\n});\r\nvar joined = parts.join('');\r\nif (joined) return { source: 'aria-labelledby', value: joined };\r\n}\r\nvar aria = n.getAttribute('aria-label');\r\nif (aria) return { source: 'aria-label', value: aria };\r\nvar lab = n.closest && n.closest('label');\r\nif (lab && rawText(lab)) return { source: 'label', value: rawText(lab) };\r\nif (rawText(n)) return { source: 'textContent', value: rawText(n) };\r\nvar p = n.parentElement;\r\nif (p && rawText(p)) return { source: '親のtextContent', value: rawText(p) };\r\nreturn { source: null, value: '' };\r\n}\r\nfunction inlineOptions(q) {\r\nvar raw = [], norm = [], src = [];\r\nArray.prototype.forEach.call(\r\nq.querySelectorAll('[role=\"radio\"],[role=\"checkbox\"],input[type=\"radio\"],input[type=\"checkbox\"]'),\r\nfunction (n) {\r\nvar got = exactChoiceText(n);\r\nif (!got.value) return;\r\nvar key = got.value.replace(/\\s+/g, ' ').trim();\r\nif (!key || norm.indexOf(key) !== -1) return;\r\nraw.push(got.value);    // 加工なし。これを事前入力に使う\r\nnorm.push(key);         // 潰した版。人が読む・照合するため\r\nsrc.push(got.source);   // どこから採ったか（後で追えるように）\r\n}\r\n);\r\nreturn { raw: raw, normalized: norm, sources: src };\r\n}\r\nvar QID_PATTERN = /^QuestionId_(r[0-9a-f]{32})$/;\r\nfunction idsOf(q) {\r\nvar own = q.id || null;\r\nvar descendants = Array.prototype.slice.call(q.querySelectorAll('[id^=\"QuestionId_\"]'))\r\n.map(function (n) { return n.id; });\r\nvar ownMatch = own && QID_PATTERN.exec(own);\r\nvar validDescendants = descendants.filter(function (d) { return QID_PATTERN.test(d); });\r\nvar qid = null;\r\nif (ownMatch) qid = ownMatch[1];\r\nelse if (validDescendants.length === 1) qid = QID_PATTERN.exec(validDescendants[0])[1];\r\nreturn {\r\nownId: own,\r\nqidFrom: ownMatch ? 'self' : (qid ? 'descendant' : null),\r\nquestionIdNodes: descendants,          // 派生IDも含めて全部報告する（構造の把握用）\r\nvalidCandidates: validDescendants,\r\nqid: qid\r\n};\r\n}\r\nfunction fieldDetails(q) {\r\nvar inp = q.querySelector('input:not([type=\"radio\"]):not([type=\"checkbox\"]):not([type=\"file\"]), textarea');\r\nif (!inp) return null;\r\nvar d = attrs(inp, ['type', 'placeholder', 'aria-label', 'aria-describedby', 'inputmode', 'maxlength', 'aria-required', 'pattern']);\r\nd.tag = inp.tagName.toLowerCase();\r\nd.currentValue = inp.value || '';\r\nif (d['aria-describedby']) {\r\nvar desc = document.getElementById(d['aria-describedby']);\r\nif (desc) d.describedByText = text(desc);\r\n}\r\nreturn d;\r\n}\r\nfunction requiredOf(q) {\r\nif (q.querySelector('[aria-required=\"true\"],[required]')) return true;\r\nvar t = headingOf(q);\r\nreturn /\\*/.test(t) || /必須|Required/.test(t);\r\n}\r\nfunction fileInfo(q) {\r\nvar inp = q.querySelector('input[type=\"file\"]');\r\nvar btn = q.querySelector('[data-automation-id=\"fileUploadButton\"]')\r\n|| q.querySelector('button[aria-label*=\"アップロード\"], button[aria-label*=\"upload\" i]')\r\n|| null;\r\nvar info = {\r\nhasNativeInput: !!inp,\r\nuploadButton: btn ? { label: text(btn) || btn.getAttribute('aria-label'), automationId: btn.getAttribute('data-automation-id') } : null,\r\nskeleton: skeleton(q, 4)\r\n};\r\nif (inp) {\r\ninfo.accept = inp.getAttribute('accept');\r\ninfo.multiple = inp.multiple === true;\r\ninfo.hiddenFromLayout = inp.offsetParent === null;\r\ninfo.name = inp.getAttribute('name');\r\n}\r\ninfo.attachedHints = Array.prototype.slice.call(q.querySelectorAll('[class*=\"file\" i],[data-automation-id*=\"file\" i]'))\r\n.map(function (n) { return text(n).slice(0, 60); })\r\n.filter(function (s) { return s; })\r\n.slice(0, 6);\r\nreturn info;\r\n}\r\nfunction dropdownOpeningEnabled() {\r\nreturn window.GSH_PROBE_OPEN_DROPDOWN === true;\r\n}\r\nasync function readDropdownOptions(q) {\r\nvar trigger = dropdownTrigger(q);\r\nif (!trigger) return { ok: false, reason: 'ドロップダウンのトリガが見つかりません' };\r\nif (!dropdownOpeningEnabled()) {\r\nreturn {\r\nok: false,\r\nskipped: true,\r\nreason: '選択肢の採取は既定で行いません（回答を書き換える事故があったため）。'\r\n+ '再取得が必要なら window.GSH_PROBE_OPEN_DROPDOWN = true を設定してから実行してください。',\r\n現在の表示: text(trigger),\r\ntriggerSkeleton: skeleton(trigger, 2)\r\n};\r\n}\r\nvar before = document.querySelectorAll('[role=\"option\"]').length;\r\nvar textBefore = text(trigger);\r\nvar report = { ok: false, 開く前の表示: textBefore, triggerSkeleton: skeleton(trigger, 2), attempts: [] };\r\nvar tries = [\r\n['pointer', function () {\r\ntrigger.focus();\r\n['pointerdown', 'mousedown', 'mouseup', 'click'].forEach(function (t) {\r\nvar Ctor = (t.indexOf('pointer') === 0 && window.PointerEvent) ? PointerEvent : MouseEvent;\r\ntrigger.dispatchEvent(new Ctor(t, { bubbles: true, cancelable: true, button: 0 }));\r\n});\r\n}],\r\n['enter', function () {\r\ntrigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));\r\ntrigger.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));\r\n}],\r\n['alt-down', function () {\r\ntrigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', altKey: true, bubbles: true }));\r\n}]\r\n];\r\nfor (var i = 0; i < tries.length; i++) {\r\ntry { tries[i][1](); } catch (e) {  }\r\nawait sleep(350);\r\nvar expanded = trigger.getAttribute('aria-expanded') === 'true';\r\nvar nowCount = document.querySelectorAll('[role=\"option\"]').length;\r\nreport.attempts.push({ how: tries[i][0], ariaExpanded: expanded, optionCount: nowCount });\r\nif (expanded || nowCount > before) break;\r\n}\r\nvar listbox = null;\r\nvar owns = trigger.getAttribute('aria-controls') || trigger.getAttribute('aria-owns');\r\nif (owns) listbox = document.getElementById(owns);\r\nif (!listbox && trigger.id) listbox = document.getElementById(trigger.id + '-list');\r\nif (!listbox) {\r\nvar boxes = Array.prototype.slice.call(document.querySelectorAll('[role=\"listbox\"]'));\r\nlistbox = boxes[boxes.length - 1] || null;\r\n}\r\nvar optionNodes = listbox\r\n? Array.prototype.slice.call(listbox.querySelectorAll('[role=\"option\"]'))\r\n: Array.prototype.slice.call(document.querySelectorAll('[role=\"option\"]'));\r\nreport.options = optionNodes.map(function (o) {\r\nvar got = exactChoiceText(o);\r\nreturn {\r\nraw: got.value,\r\nsource: got.source,\r\nnormalized: got.value.replace(/\\s+/g, ' ').trim(),\r\nescaped: escapeNonAscii(got.value),\r\nselected: o.getAttribute('aria-selected') === 'true'\r\n};\r\n});\r\nreport.listboxSkeleton = listbox ? skeleton(listbox, 3) : null;\r\nreport.ok = report.options.length > 0;\r\nif (!report.ok) report.reason = '開いたが選択肢を取得できませんでした';\r\ntry {\r\n[trigger, document.activeElement, document.body].forEach(function (target) {\r\nif (!target || !target.dispatchEvent) return;\r\ntarget.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', keyCode: 27, bubbles: true }));\r\ntarget.dispatchEvent(new KeyboardEvent('keyup', { key: 'Escape', keyCode: 27, bubbles: true }));\r\n});\r\nif (trigger.blur) trigger.blur();\r\nawait sleep(250);\r\nif (trigger.getAttribute('aria-expanded') === 'true') {\r\ndocument.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));\r\ndocument.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));\r\nawait sleep(250);\r\n}\r\n} catch (e) {  }\r\nreport.closedAfter = trigger.getAttribute('aria-expanded') !== 'true';\r\nreport.閉じた後の表示 = text(trigger);\r\nreport.回答を変えていない = report.閉じた後の表示 === textBefore;\r\nif (!report.回答を変えていない) {\r\nreport.警告 = '⚠ この設問の回答が「' + textBefore + '」から「' + report.閉じた後の表示\r\n+ '」に変わってしまいました。フォームを再読み込みして元に戻してください。';\r\n} else if (!report.closedAfter) {\r\nreport.警告 = '⚠ ドロップダウンを閉じられませんでした。フォームを再読み込みしてください。';\r\n}\r\nreturn report;\r\n}\r\nfunction scanInlineScripts() {\r\nvar hits = [];\r\nArray.prototype.forEach.call(document.scripts, function (s, i) {\r\nvar src = s.textContent || '';\r\nif (!src) return;\r\n['QuestionId_r', 'questionInfo', '\"choices\"'].forEach(function (needle) {\r\nvar at = src.indexOf(needle);\r\nif (at === -1) return;\r\nhits.push({\r\nscriptIndex: i,\r\nneedle: needle,\r\nlength: src.length,\r\nexcerpt: src.slice(Math.max(0, at - 200), at + 400)\r\n});\r\n});\r\n});\r\nreturn hits.slice(0, 6);\r\n}\r\nfunction scanFormApiCalls() {\r\ntry {\r\nreturn performance.getEntriesByType('resource')\r\n.map(function (e) { return e.name; })\r\n.filter(function (n) { return n.indexOf('/formapi/') !== -1; })\r\n.filter(function (v, i, a) { return a.indexOf(v) === i; })\r\n.slice(0, 20);\r\n} catch (e) {\r\nreturn ['(取得できませんでした: ' + (e && e.message) + ')'];\r\n}\r\n}\r\nasync function collectStage1() {\r\nvar found = questionNodes();\r\nvar items = [];\r\nfor (var i = 0; i < found.nodes.length; i++) {\r\nvar q = found.nodes[i];\r\nvar t = typeOf(q);\r\nvar ids = idsOf(q);\r\nvar rec = {\r\nindex: i,\r\nheading: headingOf(q),\r\ntype: t,\r\nrequired: requiredOf(q),\r\nids: ids\r\n};\r\nvar opts = inlineOptions(q);\r\nif (opts.raw.length) {\r\nrec.options = opts.raw.map(function (o, k) {\r\nreturn {\r\nraw: o, normalized: opts.normalized[k],\r\nsource: opts.sources[k], escaped: escapeNonAscii(o)\r\n};\r\n});\r\n}\r\nvar fd = fieldDetails(q);\r\nif (fd) rec.field = fd;\r\nif (t === 'file') rec.file = fileInfo(q);\r\nif (t === 'dropdown') {\r\nrec.dropdown = await readDropdownOptions(q);\r\n}\r\nitems.push(rec);\r\n}\r\nvar damaged = items.filter(function (it) { return it.dropdown && it.dropdown.警告; });\r\nreturn {\r\n回答を変えていないか: damaged.length === 0\r\n? 'OK（読み取りのみ。回答状態は変更していません）'\r\n: damaged.map(function (it) { return it.heading + ' … ' + it.dropdown.警告; }),\r\n収集日時: new Date().toISOString(),\r\n版: 'probe-v3',\r\nページURL: location.href,\r\nオリジン: location.origin,\r\nページタイトル: document.title,\r\n使用セレクタ: found.selector,\r\n設問数: items.length,\r\n環境: {\r\nlang: document.documentElement.lang || null,\r\nnavigatorLanguage: navigator.language,\r\nnavigatorLanguages: (navigator.languages || []).slice(0, 4),\r\n送信ボタン: (function () {\r\nvar b = Array.prototype.slice.call(document.querySelectorAll('button'))\r\n.map(function (x) { return text(x); })\r\n.filter(function (s) { return s; });\r\nreturn b.slice(-5);\r\n})()\r\n},\r\n設問: items,\r\nformapi呼び出し: scanFormApiCalls(),\r\n埋め込み定義: scanInlineScripts()\r\n};\r\n}\r\nfunction show(json) {\r\nvar old = document.getElementById('gsh-probe-overlay');\r\nif (old) old.remove();\r\nvar wrap = el('div', [\r\n'position:fixed', 'inset:3% 3%', 'z-index:2147483647',\r\n'background:#fff', 'color:#111', 'border:2px solid #333', 'border-radius:10px',\r\n'box-shadow:0 10px 50px rgba(0,0,0,.45)', 'display:flex', 'flex-direction:column',\r\n'font:14px/1.5 system-ui,sans-serif', 'padding:14px', 'gap:10px'\r\n].join(';'));\r\nwrap.id = 'gsh-probe-overlay';\r\nvar head = el('div', 'display:flex;align-items:baseline;gap:10px;flex-wrap:wrap');\r\nhead.appendChild(el('strong', 'font-size:16px', 'フォーム調査結果'));\r\nhead.appendChild(el('span', 'font-size:12px;color:#555',\r\n'入力も送信もしていません。下のテキストを全部コピーして送ってください。'));\r\nvar ta = document.createElement('textarea');\r\nta.value = json;\r\nta.setAttribute('style', 'flex:1;width:100%;font:12px/1.45 ui-monospace,Consolas,monospace;white-space:pre;box-sizing:border-box;border:1px solid #bbb;border-radius:4px;padding:8px');\r\nvar btns = el('div', 'display:flex;gap:8px;align-items:center;flex-wrap:wrap');\r\nvar msg = el('span', 'font-size:12px;color:#2e7d32', '');\r\nvar copy = el('button', 'padding:8px 16px;font-size:14px;cursor:pointer', 'クリップボードにコピー');\r\ncopy.onclick = function () {\r\nta.focus(); ta.select();\r\nif (navigator.clipboard && navigator.clipboard.writeText) {\r\nnavigator.clipboard.writeText(json).then(\r\nfunction () { msg.textContent = 'コピーしました'; },\r\nfunction () { msg.textContent = 'コピーできませんでした。Ctrl+A → Ctrl+C で手動コピーしてください'; }\r\n);\r\n} else {\r\nmsg.textContent = 'Ctrl+A → Ctrl+C で手動コピーしてください';\r\n}\r\n};\r\nbtns.appendChild(copy);\r\nvar close = el('button', 'padding:8px 16px;font-size:14px;cursor:pointer', '閉じる');\r\nclose.onclick = function () { wrap.remove(); };\r\nbtns.appendChild(close);\r\nbtns.appendChild(msg);\r\nwrap.appendChild(head);\r\nwrap.appendChild(ta);\r\nwrap.appendChild(btns);\r\ndocument.body.appendChild(wrap);\r\n}\r\nasync function run() {\r\nvar y0 = window.scrollY;\r\nwindow.scrollTo(0, document.body.scrollHeight);\r\nawait sleep(WAIT);\r\nwindow.scrollTo(0, 0);\r\nawait sleep(WAIT);\r\nvar result;\r\ntry {\r\nresult = await collectStage1();\r\n} catch (e) {\r\nresult = { エラー: String((e && e.stack) || e) };\r\n}\r\nwindow.scrollTo(0, y0);\r\nvar json = JSON.stringify(result, null, 2);\r\nconsole.log('[学傷補・学賠補 調査 v3]', result);\r\nshow(json);\r\n}\r\nrun();\r\n})();\r})();");
+    $('probe-apply').addEventListener('click', function () {
+      try {
+        var m = applyProbe($('probe-paste').value);
+        var withQid = m.questions.filter(function (q) { return q.qid; }).length;
+        setMsg($('probe-msg'),
+          '取り込みました。設問見出しを ' + m.questions.filter(function (q) { return q.match; }).length + ' 件、' +
+          '設問IDを ' + withQid + ' 件登録しました。' +
+          (m.未対応の設問.length ? '未対応の設問が ' + m.未対応の設問.length + ' 件あります。' : ''), true);
+        refresh();
+      } catch (e) {
+        setMsg($('probe-msg'), '取り込めませんでした：' + (e && e.message || e), false);
+      }
+    });
+  }
+
+  // 選択肢を先に流し込んでから値を割り当てる（順序を逆にすると select の値が入らない）
+  populateSelects();
+  var migrated = migrateChoiceValues();
+  bindFields();
+  renderPresets();
+  wire();
+  updateSaveTargetStatus();
+  refresh();
+  if (migrated.length) {
+    setMsg($('io-msg'),
+      'フォームの正式な選択肢に合わせて設定を更新しました（' + migrated.join(' / ') + '）', true);
+  }
+})(window.GSH = window.GSH || {});
+
+</script>
+</body>
+</html>

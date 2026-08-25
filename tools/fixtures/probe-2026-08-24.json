@@ -1,0 +1,275 @@
+{
+  "_note": "2026-08-24 に実フォームで採取した調査結果（probe v2 実行分）。模擬フォームの生成元。",
+  "_重要": [
+    "日付設問（index 10/11）は <input role=\"combobox\"> として描画される。",
+    "これを見落として probe v1/v2 がドロップダウンと誤判定し、本番の日付ピッカーを開いてしまった。",
+    "模擬フォームでも必ず role=combobox を再現すること。再現しないと同じバグを取り逃す。",
+    "",
+    "★ このフォームは段階表示（分岐）。開いた直後は1〜5番しか出ていない。",
+    "  5番に回答すると6〜8番、8番に回答すると以降が現れる（利用者の実測）。",
+    "  これを再現していない模擬で検証しても意味がない（実際、しばらく気付かずに",
+    "  『15/15通った』と誤った検証をしていた）。"
+  ],
+  "段階表示": [
+    {
+      "unlockedBy": null,
+      "reveals": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "_note": "開いた直後に見えている設問"
+    },
+    {
+      "unlockedBy": 4,
+      "reveals": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "_note": "5番（活動の種類）に回答すると6〜9番が出る"
+    },
+    {
+      "unlockedBy": 8,
+      "reveals": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "_note": "9番（活動主管箇所名）に回答すると以降が出る"
+    }
+  ],
+  "収集日時": "2026-08-24T13:00:18.975Z",
+  "ページURL": "https://forms.cloud.microsoft/pages/responsepage.aspx?id=clGGs4eYOkuJ_5WjW5L0w8vMoAEoHbBGiN-zwPeXqL5UMjBZV0FUVlBWNFRIU0o5RTZLOVFVU0hOTyQlQCN0PWcu&route=shorturl",
+  "ホスト": "forms.cloud.microsoft",
+  "環境": {
+    "lang": "ja",
+    "navigatorLanguage": "ja"
+  },
+  "設問": [
+    {
+      "index": 0,
+      "heading": "1.申請者氏名単一行テキスト.",
+      "type": "text",
+      "qid": "r829848c24e95420e888e243416adbd6e",
+      "placeholder": "回答を入力してください",
+      "ariaLabel": "単一行テキスト",
+      "maxlength": "4000"
+    },
+    {
+      "index": 1,
+      "heading": "2.申請者メールアドレス Applicant's email address単一行テキスト.",
+      "type": "text",
+      "qid": "r8201ab260350471fa970a10ddf643342",
+      "placeholder": "メールを入力してください",
+      "ariaLabel": "単一行テキスト",
+      "maxlength": "4000"
+    },
+    {
+      "index": 2,
+      "heading": "3.共有用メールアドレス Email address to share the content with単一行テキスト.",
+      "type": "text",
+      "qid": "r802a462c85d1468ab474c949cab3c58d",
+      "placeholder": "メールを入力してください",
+      "ariaLabel": "単一行テキスト",
+      "maxlength": "4000"
+    },
+    {
+      "index": 3,
+      "heading": "4.加入を希望する補償制度 Compensation system you wish to register単一選択.",
+      "type": "radio",
+      "qid": "ra7268c22275a48a0b642fb9044c7026c",
+      "options": [
+        "1.　学傷補のみ加入  Register only for “Compensation for Injury”",
+        "2.　学傷補と学賠補　両方に加入　 Register for both “Compensation for Injury” and “Liability Coverage”"
+      ]
+    },
+    {
+      "index": 4,
+      "heading": "5.活動の種類 Type of activity単一選択.",
+      "type": "radio",
+      "qid": "r08ba9ed20b864472902fbf3d3daf9795",
+      "options": [
+        "1.授業 Class",
+        "2.研究活動 Research Activities",
+        "3.インターンシップ Internship",
+        "4.ボランティア活動 Volunteer Activities",
+        "5.教育実習 Educational Practice",
+        "6.学校行事 School events",
+        "7.その他 Other"
+      ]
+    },
+    {
+      "index": 5,
+      "heading": "6.【上記質問で「1.授業」を選択した場合のみ】参加者は全員科目登録者ですか？ [If you selected \"1. Class\" for the above question] Are all participants registered for the course?単一選択.",
+      "type": "radio",
+      "qid": "r85ffd7ec7cc44039b23c0c3cf1ab31b4",
+      "options": [
+        "はい Yes",
+        "いいえ No"
+      ]
+    },
+    {
+      "index": 6,
+      "heading": "7.科目名 / 行事名 / 活動名 Name of Subject / Event / Activity複数行テキスト.",
+      "type": "textarea",
+      "qid": "r791bdf527cb045b08eca774ed14eb659",
+      "placeholder": "回答を入力してください",
+      "ariaLabel": "複数行テキスト",
+      "maxlength": "4000"
+    },
+    {
+      "index": 7,
+      "heading": "8.活動内容 Description of Activity複数行テキスト.",
+      "type": "textarea",
+      "qid": "r524a1902a291405eb84e08daa4fd5458",
+      "placeholder": "回答を入力してください",
+      "ariaLabel": "複数行テキスト",
+      "maxlength": "4000"
+    },
+    {
+      "index": 8,
+      "heading": "9.活動主管箇所名 Department responsible for the activity単一選択.",
+      "type": "dropdown",
+      "qid": "r055babb062ca4202bb615df4274266a7",
+      "dropdownOptions": [
+        "政治経済学部 School of Political Science and Economics",
+        "法学部 School of Law",
+        "教育学部/教育学研究科 School of Education/Graduate School of Education",
+        "商学部/商学研究科 School of Commerce/Graduate School of Commerce",
+        "社会科学部/社会科学研究科 School of Social Sciences/Graduate School of Social Sciences",
+        "所沢総合事務センター（人科・スポ科　学部/研究科） Administrative Office, Tokorozawa",
+        "国際教養学部/国際コミュニケーション研究科 SILS/GSICCS",
+        "文学学術院事務所（文構/文/文研）Administrative Office, Faculty of Letters, Arts and Sciences",
+        "理工センター教学支援課（基幹・創造・先進理工学部/研究科）Academic and Student Affairs Section, Science and Engineering",
+        "政治学研究科 Graduate School of Political Science",
+        "経済学研究科 Graduate School of Economics",
+        "法学研究科 Graduate School of Law",
+        "アジア太平洋研究科 GSAPS",
+        "日本語教育研究科 Graduate School of Japanese Applied Linguistics",
+        "情報生産システム研究科 Graduate School of Information, Production and Systems",
+        "会計研究科 Graduate School of Accountancy",
+        "環境・エネルギー研究科 WEEE",
+        "経営管理研究科 Graduate School of Business and Finance",
+        "日本語教育研究センター Center for Japanese Language",
+        "留学センター CIE",
+        "平山郁夫記念ボランティアセンター（WAVOC）",
+        "競技スポーツセンター Athletic Center",
+        "グローバルエデュケーションセンター Global Education Center",
+        "教育企画課 Educational Planning Section",
+        "Global Citizenship Center",
+        "早稲田ポータルオフィス WPO",
+        "社会連携課 External Affairs and Fund-Raising Section",
+        "キャリアセンターCareer Center",
+        "学生生活課 Student Affairs Section",
+        "ICC",
+        "GSセンターGender and Sexuality Center",
+        "国際課 International Office",
+        "データ科学センター Center for Data Science",
+        "アントレプレナーシップセンター Center for Entrepreneurship",
+        "文化企画課 Cultural Planning Section",
+        "その他 Other"
+      ]
+    },
+    {
+      "index": 9,
+      "heading": "10.【上記質問で「その他」を選択した場合のみ】箇所名を以下に入力してください。 [If you selected \"Other\" for the above question] Please enter the name of the department below.単一行テキスト.",
+      "type": "text",
+      "qid": "r7cadf2f9359849d1aab19fc07494d1ff",
+      "placeholder": "回答を入力してください",
+      "ariaLabel": "単一行テキスト",
+      "maxlength": "4000"
+    },
+    {
+      "index": 10,
+      "heading": "11.責任者名 Responsible person's name単一行テキスト.",
+      "type": "text",
+      "qid": "rb121068c2b55491787cc7975fb8d428c",
+      "placeholder": "回答を入力してください",
+      "ariaLabel": "単一行テキスト",
+      "maxlength": "4000"
+    },
+    {
+      "index": 11,
+      "heading": "12.活動開始日 Activity start date日付.",
+      "type": "date",
+      "qid": "r2249163124ac486d921ea6cb5f0ba4a3",
+      "placeholder": "日付を入力してください(yyyy/MM/dd)",
+      "ariaLabel": "日付の選択",
+      "datePickerId": "DatePicker0-label"
+    },
+    {
+      "index": 12,
+      "heading": "13.活動終了日 Activity end date日付.",
+      "type": "date",
+      "qid": "r2cb2bb95896c4746b78bcb197e33ad44",
+      "placeholder": "日付を入力してください(yyyy/MM/dd)",
+      "ariaLabel": "日付の選択",
+      "datePickerId": "DatePicker7-label"
+    },
+    {
+      "index": 13,
+      "heading": "14.参加学生数 Number of participating students単一行テキスト.",
+      "type": "text",
+      "qid": "r04a227d9fe5c4dcbb6dbd869521a3f9f",
+      "placeholder": "値は数値にする必要があります",
+      "ariaLabel": "単一行テキスト",
+      "maxlength": "4000",
+      "numericOnly": true
+    },
+    {
+      "index": 14,
+      "heading": "15.活動場所（国内/海外）Location of activity (domestic/overseas)単一選択.",
+      "type": "radio",
+      "qid": "r00b622fab56749a2950854c57e46133f",
+      "options": [
+        "1.国内 Domestic",
+        "2.海外 Overseas"
+      ]
+    },
+    {
+      "index": 15,
+      "heading": "16.活動場所 Location of activity複数行テキスト.",
+      "type": "textarea",
+      "qid": "r45161e19dddf4ea9afca395a0b574454",
+      "placeholder": "回答を入力してください",
+      "ariaLabel": "複数行テキスト",
+      "maxlength": "4000"
+    },
+    {
+      "index": 16,
+      "heading": "17.参加者名簿 List of participants ※所定書式でご提出ください (非匿名の質問)ファイルのアップロード.",
+      "type": "file",
+      "qid": "r4b4e4085572a459989b5f120454cbd90",
+      "accept": ".xls,.xlt,.xlm,.xlsx,.xlsm,.xltx,.xltm",
+      "multiple": true
+    },
+    {
+      "index": 17,
+      "heading": "18.備考 Remarks複数行テキスト.",
+      "type": "textarea",
+      "qid": "r1975cc93571f4519b76f6eeaeb7b4a16",
+      "placeholder": "回答を入力してください",
+      "ariaLabel": "複数行テキスト",
+      "maxlength": "4000"
+    }
+  ],
+  "formapi呼び出し": [
+    "https://forms.cloud.microsoft/formapi/api/isEduTenant",
+    "https://forms.cloud.microsoft/formapi/api/userInfo",
+    "https://forms.cloud.microsoft/formapi/api/b3865172-9887-4b3a-89ff-95a35b92f4c3/groups/01a0cccb-1d28-46b0-88df-b3c0f797a8be/forms('clGGs4eYOkuJ_5WjW5L0w8vMoAEoHbBGiN-zwPeXqL5UMjBZV0FUVlBWNFRIU0o5RTZLOVFVU0hOTyQlQCN0PWcu')/localeResource/'ja'"
+  ],
+  "_未確定": [
+    "事前入力（prefill）が効くかは未検証。設問IDの綴り・日付・選択肢・ハッシュの生存すべて未確認",
+    "必須設問は全17問とも aria-required が無く required:false だった"
+  ]
+}

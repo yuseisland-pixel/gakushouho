@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>学傷補・学賠補 活動届 入力支援</title>
+<!-- __STYLE__ -->
+</head>
+<body>
+
+<header>
+  <h1>学傷補・学賠補 活動届 入力支援</h1>
+  <p class="lead">
+    毎回同じ入力を省いて、参加者名簿の Excel を自動で作ります。
+    <strong>データはこのパソコンの中だけに保存され、どこにも送信されません。</strong>
+  </p>
+  <p class="ver" id="version"></p>
+</header>
+
+<!-- ── 初回設定ゲート ───────────────────────────── -->
+<section id="gate" class="card warn hidden">
+  <h2>はじめに、あなたの情報を設定してください</h2>
+  <p>
+    ここが空のままだと、他の人の名前で申請してしまう事故が起きます。
+    設定が終わるまで名簿の作成とフォーム入力は使えません。
+  </p>
+</section>
+
+<!-- ── 1. 個人設定 ─────────────────────────────── -->
+<section class="card" id="sec-personal">
+  <h2>1. あなたの情報 <span class="badge person">各自で入力</span></h2>
+  <p class="note">この欄は人によって違います。配布されたファイルを使う場合も、ここは必ず自分で入れ直してください。</p>
+  <div class="grid">
+    <label>氏名<input id="p-name" placeholder="早稲田 太郎"></label>
+    <label>カナ氏名<input id="p-kana" placeholder="ワセダ　タロウ"><small>名簿に使います。全角カナ、姓名の間は全角スペース</small></label>
+    <label>学籍番号<input id="p-sid" placeholder="1A123456"><small>半角英数8桁。ハイフン以降は入れません</small></label>
+    <label>大学のメールアドレス<input id="p-mail1" placeholder="xxxx@waseda.jp"></label>
+    <label>連絡先メールアドレス<input id="p-mail2" placeholder="xxxx@ruri.waseda.jp"></label>
+  </div>
+</section>
+
+<!-- ── 2. 団体設定 ─────────────────────────────── -->
+<section class="card" id="sec-org">
+  <h2>2. 団体の情報 <span class="badge org">団体で共通</span></h2>
+  <p class="note">サークルで1人が設定して、JSON書き出しで配れば他の人は入力不要です。</p>
+  <div class="grid">
+    <label>団体名<input id="o-org" placeholder="生物同好会"></label>
+    <label>活動名（フォーム用）<input id="o-act" placeholder="生物同好会での活動"><small>フォームの「科目名 / 行事名 / 活動名」に入ります</small></label>
+    <label>責任者名<input id="o-resp" placeholder="顧問または代表者の氏名"></label>
+    <label>加入を希望する補償制度<select id="o-ins"></select></label>
+    <label>活動の種類<select id="o-kind"></select></label>
+    <label id="o-allreg-wrap" class="hidden">参加者は全員科目登録者ですか<select id="o-allreg"></select><small>「1.授業」を選んだときだけフォームに出る設問です</small></label>
+    <label>活動主管箇所名<select id="o-window"></select></label>
+    <label id="o-window-other-wrap" class="hidden">箇所名（その他を選んだ場合）<input id="o-window-other" placeholder="箇所名"></label>
+    <label>既定の活動場所<input id="o-place" placeholder="早稲田キャンパス"></label>
+    <label>既定の活動場所（国内/海外）<select id="o-area"></select></label>
+  </div>
+  <p class="note">選択式の項目は、フォームの選択肢をそのまま並べています（英語まで含めて一致していないとフォーム側で弾かれるため）。</p>
+</section>
+
+<!-- ── 3. メンバー辞書 ─────────────────────────── -->
+<section class="card" id="sec-members">
+  <h2>3. メンバー辞書</h2>
+  <p class="note">一度登録すれば、次回からはチェックを入れるだけで名簿に載ります。</p>
+  <div class="member-add">
+    <input id="m-sid" placeholder="学籍番号 1A123456" size="12">
+    <input id="m-kana" placeholder="カナ氏名 ワセダ　タロウ" size="18">
+    <input id="m-name" placeholder="表示名 早稲田太郎" size="14">
+    <button id="m-add" class="primary">追加</button>
+    <button id="m-add-self" class="ghost">自分を追加</button>
+  </div>
+  <div class="member-tools">
+    <input id="m-filter" placeholder="名前・学籍番号で絞り込み" size="22">
+    <button id="m-all" class="ghost">全員選択</button>
+    <button id="m-none" class="ghost">選択解除</button>
+    <span id="m-count" class="count"></span>
+  </div>
+  <div id="member-list" class="member-list"></div>
+</section>
+
+<!-- ── 4. 活動情報 ─────────────────────────────── -->
+<section class="card" id="sec-activity">
+  <h2>4. 今回の活動</h2>
+  <p class="note">ここに1回入れれば、フォームと名簿の両方に反映されます。名簿の申請年月日は本日の日付が自動で入ります。</p>
+  <div class="grid">
+    <label>活動内容<textarea id="a-content" rows="2" placeholder="フィールドワーク（採集・観察）"></textarea></label>
+    <label>活動場所<input id="a-place" placeholder="○○県○○市 ○○川河川敷"></label>
+    <label>活動開始日<input id="a-start" type="date"></label>
+    <label>活動終了日<input id="a-end" type="date"></label>
+    <label>備考（任意）<textarea id="a-remarks" rows="2" placeholder="特になければ空のままで構いません"></textarea></label>
+  </div>
+  <p class="note" id="count-badge"></p>
+  <div class="preset-row">
+    <select id="preset-sel"><option value="">プリセットを選ぶ…</option></select>
+    <button id="preset-save" class="ghost">今の内容をプリセット保存</button>
+    <button id="preset-del" class="ghost">選択中のプリセットを削除</button>
+  </div>
+</section>
+
+<!-- ── 5. 出力 ─────────────────────────────────── -->
+<section class="card" id="sec-output">
+  <h2>5. 作る</h2>
+  <div id="issues" class="issues hidden"></div>
+
+  <div class="out-block">
+    <h3>① 参加者名簿（Excel）</h3>
+    <p class="note">大学配布のテンプレートをそのまま使い、値だけ差し込みます。書式・テーブル・入力規則は原本のまま残ります。</p>
+    <div id="save-target-section" style="margin-bottom:12px">
+      <p class="note" style="font-size:12px;margin-bottom:6px">
+        <strong>保存先フォルダの設定（Edge/Chrome 限定）：</strong>
+        初回だけフォルダを選んでおくと、同名ファイルがあるときに自動的に <code>old/</code> フォルダへ移してから保存するようになります。
+        file:// で開いた場合は動作しない可能性があります。その場合は下の「ダウンロード」ボタンを使ってください。
+      </p>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button id="btn-pick-folder" class="ghost" style="font-size:12px">フォルダを選ぶ</button>
+        <span id="save-target-status" style="font-size:12px;color:#666"></span>
+      </div>
+    </div>
+    <button id="btn-roster" class="primary big">名簿をダウンロード</button>
+    <span id="roster-msg" class="msg"></span>
+  </div>
+
+  <div class="out-block">
+    <h3>フォームに入る内容の確認</h3>
+    <p class="note">自動入力でフォームのどの設問に何が入るかの一覧です。ここで確認してから実行してください。</p>
+    <div id="review"></div>
+  </div>
+
+  <div class="out-block" id="prefill-block">
+    <h3>② フォームを開く（値が入った状態で）</h3>
+    <p class="note">
+      下のリンクを押すと、値が入った状態でフォームが開きます。<strong>これが本命です。</strong>
+    </p>
+    <p>
+      <a id="prefill-link" href="#" target="_blank" rel="noopener" class="bookmarklet">値を入れてフォームを開く</a>
+      <span class="count" id="prefill-count"></span>
+    </p>
+    <p class="count">
+      <label><input type="checkbox" id="shorten-url"> URLを短くする（「URLが長すぎる」と言われたとき）</label>
+    </p>
+    <p class="count">このリンクには氏名とメールアドレスが含まれます。他人に送らないでください。</p>
+    <div class="count" id="prefill-note"></div>
+
+    <details>
+      <summary>前回の内容が残っているとき</summary>
+      <p class="note">
+        Microsoft Forms は<strong>書きかけの回答（下書き）を保存します</strong>。
+        前に開いたときの選択が残っていることがあります。
+      </p>
+      <p class="note">
+        事前入力リンクは<strong>値を送った設問だけを上書きします</strong>。
+        送っていない設問に前回の値が残っていたら、手で直してください。
+        とくに<strong>活動の種類</strong>は、選び方によって出てくる設問が変わるので、
+        意図した値になっているか確認してください。
+      </p>
+      <p class="note">
+        入らなかった項目は、下の<strong>③のブックマークレット</strong>で埋められます。
+        ③は画面を直接操作するので、確実に上書きします。
+      </p>
+    </details>
+  </div>
+
+  <div class="out-block">
+    <h3>③ 入らなかった項目を埋める（保険）</h3>
+    <p class="note">
+      ②で入りきらなかったときに使います。②で開いたフォームの上でこのブックマークをクリックすると、
+      <strong>15問すべてを埋め直します。</strong>画面右上に「どの設問に何が入ったか」の一覧が出ます。
+    </p>
+    <p>
+      <a id="bm-link" href="#" class="bookmarklet">学傷補・学賠補フォーム自動入力</a>
+      <span id="bm-size" class="count"></span>
+    </p>
+    <p class="note">
+      初回だけ、上の青いボタンを<strong>ブックマークバーにドラッグ</strong>して登録してください
+      （<code>Ctrl</code> + <code>Shift</code> + <code>B</code> でバーが出ます）。
+      <strong>登録は一度きり</strong>で、設定を変えても大学がフォームを変えても登録し直しは要りません。
+      <strong>入力後は必ず目で確認してから送信してください。</strong>
+    </p>
+    <details>
+      <summary>ドラッグできないとき（コードをコピーして手動でブックマークに貼る）</summary>
+      <textarea id="bm-text" rows="4" readonly></textarea>
+      <button id="bm-copy" class="ghost">コードをコピー</button>
+    </details>
+    <p class="warnbox" id="bm-warn"></p>
+  </div>
+</section>
+
+<!-- ── 6. データ管理 ───────────────────────────── -->
+<section class="card" id="sec-data">
+  <h2>6. 設定の保存・受け渡し</h2>
+  <p class="note">
+    書き出したファイルには参加者の学籍番号と氏名が入ります。共有範囲に注意してください。
+  </p>
+  <div class="io-row">
+    <select id="exp-mode"></select>
+    <button id="btn-export" class="ghost">JSONで書き出す</button>
+    <label class="filebtn">JSONを読み込む<input id="imp-file" type="file" accept="application/json,.json"></label>
+    <button id="btn-clear" class="danger">この端末のデータを全部消す</button>
+  </div>
+  <p id="io-msg" class="msg"></p>
+
+  <details>
+    <summary>フォームの設問マッピングを更新する（フォームが変わって入力がズレたとき）</summary>
+    <p class="note">
+      調査用ブックマークレットをフォーム上で実行して出てきた JSON を、ここに貼り付けてください。
+      設問 ID が取れていれば、上の「事前入力リンク」も使えるようになります。
+    </p>
+    <p><a id="probe-link" href="#" class="bookmarklet">フォーム調査（開発者に送る用）</a></p>
+    <textarea id="probe-paste" rows="5" placeholder="調査結果の JSON をここに貼り付け"></textarea>
+    <button id="probe-apply" class="ghost">取り込む</button>
+    <span id="probe-msg" class="msg"></span>
+  </details>
+</section>
+
+<footer>
+  <p>
+    このツールは入力補助です。記載内容の正確性と申請の責任は利用者本人にあります。
+    送信前に必ず内容を確認してください。
+  </p>
+</footer>
+
+<!-- __TEMPLATE__ -->
+<!-- __SCRIPTS__ -->
+</body>
+</html>
