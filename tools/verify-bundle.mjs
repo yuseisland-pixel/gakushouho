@@ -117,7 +117,7 @@ console.log('\n事前入力 URL の組み立て');
     'org.申請先その他': '', 'org.責任者名': 'ZZ責任者 花子',
     'draft.活動開始日': '2026/09/01', 'draft.活動終了日': '2026/09/03',
     'derived.参加学生数': '7',
-    'org.既定の国内外': choice('r00b622fab56749a2950854c57e46133f', 0),
+    'draft.国内外': choice('r00b622fab56749a2950854c57e46133f', 0),
     'draft.活動場所': '○○県○○市 ○○川河川敷', 'draft.備考': ''
   };
   const resolve = (q) => (q.source && V[q.source] != null) ? V[q.source] : '';

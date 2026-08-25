@@ -37,7 +37,7 @@
    * 一意に決まらなければ空にして、利用者に選び直してもらう。 */
   function migrateChoiceValues() {
     var changed = [];
-    ['org.加入区分', 'org.活動区分', 'org.申請先', 'org.既定の国内外'].forEach(function (source) {
+    ['org.加入区分', 'org.活動区分', 'org.申請先', 'draft.国内外'].forEach(function (source) {
       var choices = choicesFor(source);
       if (!choices) return;
       var parts = source.split('.');
@@ -71,8 +71,7 @@
     ['o-ins', 'org', '加入区分'], ['o-kind', 'org', '活動区分'],
     ['o-allreg', 'org', '全員科目登録者'], ['o-window', 'org', '申請先'],
     ['o-window-other', 'org', '申請先その他'],
-    ['o-place', 'org', '既定の活動場所'], ['o-area', 'org', '既定の国内外'],
-    ['a-content', 'draft', '活動内容'], ['a-place', 'draft', '活動場所'],
+    ['a-content', 'draft', '活動内容'], ['a-area', 'draft', '国内外'], ['a-place', 'draft', '活動場所'],
     ['a-start', 'draft', '活動開始日'], ['a-end', 'draft', '活動終了日'],
     ['a-remarks', 'draft', '備考']
   ];
@@ -84,17 +83,11 @@
     ['o-kind', 'org.活動区分'],
     ['o-allreg', 'org.全員科目登録者'],
     ['o-window', 'org.申請先'],
-    ['o-area', 'org.既定の国内外']
-  ];
-
-  // 申請者情報の辞書対象フィールド [input要素ID, state上のキー, state上のオブジェクト, chips要素ID, save要素ID]
-  var HISTORY_FIELDS = [
-    ['ap-name', 'applicant', '氏名', 'ap-name-chips', 'ap-name-save'],
-    ['ap-mail', 'applicant', 'メール', 'ap-mail-chips', 'ap-mail-save']
+    ['a-area', 'draft.国内外']
   ];
 
   // 団体プリセットの対象フィールド（state.org のキー）
-  var ORG_PRESET_FIELDS = ['団体名', '活動名', '責任者名', '加入区分', '活動区分', '全員科目登録者', '申請先', '申請先その他', '既定の活動場所', '既定の国内外'];
+  var ORG_PRESET_FIELDS = ['団体名', '活動名', '責任者名', '加入区分', '活動区分', '全員科目登録者', '申請先', '申請先その他'];
 
   function populateSelects() {
     SELECTS.forEach(function (s) {
@@ -156,43 +149,47 @@
     });
   }
 
-  // 個人情報履歴をチップとして描画
-  function renderFieldHistory(key, chipsId, inputId) {
-    var box = $(chipsId);
+  // 申請者辞書（氏名+メールの組）をチップとして描画
+  function renderApplicantHistory() {
+    var box = $('ap-chips');
     box.textContent = '';
-    var input = $(inputId);
-    (state.history[key] || []).forEach(function (value) {
+    var hist = state.history.applicant || [];
+    hist.forEach(function (item) {
       var chip = document.createElement('span');
       chip.className = 'chip';
       chip.innerHTML = '<span class="chip-text"></span><button type="button" class="chip-del">✕</button>';
-      chip.querySelector('.chip-text').textContent = value;
+      chip.querySelector('.chip-text').textContent = (item.氏名 || '') + '　<' + (item.メール || '') + '>';
 
       chip.querySelector('.chip-text').addEventListener('click', function () {
-        input.value = value;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
+        $('ap-name').value = item.氏名 || '';
+        $('ap-mail').value = item.メール || '';
+        $('ap-name').dispatchEvent(new Event('input', { bubbles: true }));
+        $('ap-mail').dispatchEvent(new Event('input', { bubbles: true }));
       });
 
       chip.querySelector('.chip-del').addEventListener('click', function () {
-        state.history[key] = (state.history[key] || []).filter(function (v) { return v !== value; });
+        state.history.applicant = hist.filter(function (x) { return x !== item; });
         persist();
-        renderFieldHistory(key, chipsId, inputId);
+        renderApplicantHistory();
       });
 
       box.appendChild(chip);
     });
   }
 
-  // 個人情報の値を履歴に保存するボタンのハンドラー
-  function wireHistorySave(saveId, inputId, key) {
-    $(saveId).addEventListener('click', function () {
-      var value = $(inputId).value.trim();
-      if (!value) return;
-      var hist = state.history[key] = state.history[key] || [];
-      if (hist.indexOf(value) === -1) {
-        hist.unshift(value);
+  // 申請者辞書の値を保存するボタンのハンドラー
+  function wireApplicantHistorySave() {
+    $('ap-save').addEventListener('click', function () {
+      var name = $('ap-name').value.trim();
+      var mail = $('ap-mail').value.trim();
+      if (!name || !mail) return;
+      var hist = state.history.applicant = state.history.applicant || [];
+      // 同じ組がなければ追加
+      if (!hist.some(function (x) { return x.氏名 === name && x.メール === mail; })) {
+        hist.unshift({ 氏名: name, メール: mail });
         if (hist.length > 10) hist.pop();
         persist();
-        renderFieldHistory(key, HISTORY_FIELDS.find(function (f) { return f[4] === saveId; })[3], inputId);
+        renderApplicantHistory();
       }
     });
   }
@@ -338,7 +335,7 @@
     if (state.draft.活動開始日 && state.draft.活動終了日 && state.draft.活動終了日 < state.draft.活動開始日) {
       out.push('活動終了日が活動開始日より前になっています。');
     }
-    if (!(state.draft.活動場所 || state.org.既定の活動場所)) out.push('活動場所を入れてください。');
+    if (!state.draft.活動場所) out.push('活動場所を入れてください。');
     return out;
   }
 
@@ -350,9 +347,7 @@
       personal: state.personal,
       applicant: state.applicant,
       org: state.org,
-      draft: Object.assign({}, state.draft, {
-        活動場所: state.draft.活動場所 || state.org.既定の活動場所
-      }),
+      draft: state.draft,
       derived: {
         参加学生数: String(selectedMembers().length)
       }
@@ -653,12 +648,9 @@
       state.draft.参加者 = []; persist(); refresh();
     });
 
-    // 個人情報の履歴を初期化・ハンドラー登録
-    HISTORY_FIELDS.forEach(function (f) {
-      var inputId = f[0], objKey = f[1], stateKey = f[2], chipsId = f[3], saveId = f[4];
-      renderFieldHistory(stateKey, chipsId, inputId);
-      wireHistorySave(saveId, inputId, stateKey);
-    });
+    // 申請者辞書の初期化・ハンドラー登録
+    renderApplicantHistory();
+    wireApplicantHistorySave();
 
     // 共有用メールアドレスの「自分のアドレスを使う」チェックボックス
     $('ap-share-use-own').checked = !!state.applicant.共有メール自分を使う;
@@ -681,7 +673,7 @@
         state.org[key] = p[key] || '';
       });
       persist();
-      var orgFieldIds = ['o-org', 'o-act', 'o-resp', 'o-ins', 'o-kind', 'o-allreg', 'o-window', 'o-window-other', 'o-place', 'o-area'];
+      var orgFieldIds = ['o-org', 'o-act', 'o-resp', 'o-ins', 'o-kind', 'o-allreg', 'o-window', 'o-window-other'];
       syncFieldValues(orgFieldIds);
       refresh();
     });

@@ -67,12 +67,12 @@ const VALUES = {
     活動区分: choiceOf('r08ba9ed20b864472902fbf3d3daf9795', 6),   // 7.その他（授業ではない）
     全員科目登録者: choiceOf('r85ffd7ec7cc44039b23c0c3cf1ab31b4', 0),
     申請先: '学生生活課 Student Affairs Section',
-    申請先その他: '',
-    既定の国内外: '1.国内 Domestic'
+    申請先その他: ''
   },
   draft: {
     活動内容: 'フィールドワーク（採集・観察）',
     活動場所: '○○県○○市 ○○川河川敷',
+    国内外: '1.国内 Domestic',
     活動開始日: '2026-09-01',
     活動終了日: '2026-09-03',
     備考: ''
@@ -187,7 +187,7 @@ check('責任者名（旧版で空だった欄）', byLabel(S, '責任者名').v
 check('活動開始日（yyyy/MM/dd）', byLabel(S, '活動開始日').value === '2026/09/01', byLabel(S, '活動開始日').value);
 check('活動終了日（yyyy/MM/dd）', byLabel(S, '活動終了日').value === '2026/09/03', byLabel(S, '活動終了日').value);
 check('参加学生数（メンバー数から自動）', byLabel(S, '参加学生数').value === '7', byLabel(S, '参加学生数').value);
-check('活動場所（国内/海外）（旧版で未選択だった欄）', byLabel(S, '活動場所（国内/海外）').checked === VALUES.org.既定の国内外, byLabel(S, '活動場所（国内/海外）').checked);
+check('活動場所（国内/海外）（旧版で未選択だった欄）', byLabel(S, '活動場所（国内/海外）').value === VALUES.draft.国内外, byLabel(S, '活動場所（国内/海外）').value);
 check('活動場所（国内/海外の欄と紛らわしい）', byLabel(S, '活動場所').value === VALUES.draft.活動場所, byLabel(S, '活動場所').value);
 check('備考（既定は空のまま）', !byLabel(S, '備考').value, byLabel(S, '備考').value || '(空)');
 
@@ -250,8 +250,8 @@ if (rIns && !rIns.error) {
   check('【その他の場合のみ】箇所名が空のまま（旧版はここに責任者名を書いた）',
     !shifted('【その他の場合のみ】箇所名').value, shifted('【その他の場合のみ】箇所名').value || '(空)');
   check('国内/海外が選択される（旧版は未選択だった）',
-    shifted('活動場所（国内/海外）').checked === VALUES.org.既定の国内外,
-    shifted('活動場所（国内/海外）').checked);
+    shifted('活動場所（国内/海外）').value === VALUES.draft.国内外,
+    shifted('活動場所（国内/海外）').value);
   check('挿入された設問には何も入れていない', !at(T, INS_AT).value, at(T, INS_AT).value || '(空)');
   check('設問数の食い違いを警告している', /設問数/.test(rIns.bannerText));
 } else {
@@ -373,7 +373,7 @@ console.log('\n[7b] 段階表示（分岐）');
     check('分岐の描画が遅れても15問すべて埋まる',
       byLabel(S2, '責任者名').value === VALUES.org.責任者名
       && byLabel(S2, '活動場所').value === VALUES.draft.活動場所
-      && byLabel(S2, '活動場所（国内/海外）').checked === VALUES.org.既定の国内外,
+      && byLabel(S2, '活動場所（国内/海外）').value === VALUES.draft.国内外,
       `責任者名=${byLabel(S2, '責任者名').value} / 活動場所=${byLabel(S2, '活動場所').value}`);
     check('遅延時も失敗項目がない', !slow.rows.some((x) => x.mark === '✖'),
       slow.rows.filter((x) => x.mark === '✖').map((x) => x.label).join('、') || 'なし');
