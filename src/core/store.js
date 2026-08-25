@@ -25,10 +25,11 @@
        * 事前入力は完全一致でないと通らないし、DOM クリックも完全一致で照合するため。 */
       org: {
         団体名: '', 活動名: '', 責任者名: '',
-        加入区分: '1. 学傷補のみ加入 Register only for “Compensation for Injury”',
-        活動区分: '7.その他 Other',
+        加入区分: "1.　学傷補のみ加入  Register only for “Compensation for Injury”",
+        活動区分: "7.その他 Other",
         申請先: '学生生活課 Student Affairs Section',
-        申請先その他: ''        // 申請先が「その他」のときだけ使う
+        申請先その他: '',        // 申請先が「その他」のときだけ使う
+        全員科目登録者: ''
       },
       members: [],
       presets: [],
@@ -177,7 +178,12 @@
       var added = 0, updated = 0;
       incoming.members.forEach(function (m) {
         if (seen[m.学籍番号]) { Object.assign(seen[m.学籍番号], m); updated++; }
-        else { next.members.push(Object.assign({ id: newId() }, m)); added++; }
+        else {
+          var newEntry = Object.assign({ id: newId() }, m);
+          next.members.push(newEntry);
+          seen[m.学籍番号] = newEntry;  // Dedup incoming members with same 学籍番号
+          added++;
+        }
       });
       report.push('メンバーを ' + added + ' 件追加、' + updated + ' 件更新しました');
     }
