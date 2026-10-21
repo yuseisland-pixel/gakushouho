@@ -7,7 +7,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
+          check-latest: true
       # 名簿テンプレートは著作権配慮でリポジトリに含めず、アプリと同じ CDN から取得する
       - name: Fetch roster template
         run: |
